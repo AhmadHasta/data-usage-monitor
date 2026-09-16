@@ -42,6 +42,9 @@ import com.hastaa.datausagemonitor.ui.theme.CyanNeon
 import com.hastaa.datausagemonitor.ui.theme.SurfaceBorderDark
 import com.hastaa.datausagemonitor.ui.theme.TextSecondary
 
+import android.widget.Toast
+import androidx.compose.ui.platform.LocalContext
+
 @Composable
 fun QuickSettingsBanner(
     onDismiss: () -> Unit,
@@ -111,7 +114,10 @@ fun QuickSettingsBanner(
             ) {
                 Button(
                     onClick = {
-                        requestAddQuickSettingsTile(context)
+                        requestAddQuickSettingsTile(context) { message ->
+                            Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+                        }
+                        onDismiss()
                     },
                     colors = ButtonDefaults.buttonColors(
                         containerColor = CyanNeon,
@@ -130,19 +136,45 @@ fun QuickSettingsBanner(
     }
 }
 
-private fun requestAddQuickSettingsTile(context: Context) {
+private fun requestAddQuickSettingsTile(
+    context: Context,
+    onFeedback: (String) -> Unit
+) {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
         try {
             val statusBarManager = context.getSystemService(StatusBarManager::class.java)
+            if (statusBarManager == null) {
+                onFeedback("Silakan tambahkan tile melalui Control Center -> Edit")
+                return
+            }
             val component = ComponentName(context, DataUsageTileService::class.java)
             statusBarManager.requestAddTileService(
                 component,
                 context.getString(R.string.tile_label),
                 Icon.createWithResource(context, R.drawable.ic_tile_data_usage),
                 context.mainExecutor
-            ) { /* result callback */ }
-        } catch (e: Exception) {
-            // OEM fallback
+            ) { result ->
+                try {
+                    when (result) {
+                        StatusBarManager.TILE_ADD_REQUEST_RESULT_TILE_ALREADY_ADDED -> {
+                            onFeedback("Tile Data Usage sudah aktif di Quick Settings")
+                        }
+                        StatusBarManager.TILE_ADD_REQUEST_RESULT_TILE_ADDED -> {
+                            onFeedback("Tile berhasil ditambahkan!")
+                        }
+                        else -> {
+                            onFeedback("Buka Control Center dan tekan Edit untuk mengatur tile")
+                        }
+                    }
+                } catch (t: Throwable) {
+                    // Shield against any callback dispatch exceptions
+                }
+            }
+        } catch (t: Throwable) {
+            // Xiaomi HyperOS / MIUI or custom OEM ROM fallback
+            onFeedback("Tile sudah tersedia di menu Edit Control Center")
         }
+    } else {
+        onFeedback("Tarik panel Quick Settings lalu tekan Edit untuk menambahkan tile")
     }
 }

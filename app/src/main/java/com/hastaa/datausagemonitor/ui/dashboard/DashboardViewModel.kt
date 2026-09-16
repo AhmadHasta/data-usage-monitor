@@ -120,7 +120,7 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
             val context = getApplication<Application>()
             val component = ComponentName(context, DataUsageTileService::class.java)
             TileService.requestListeningState(context, component)
-        } catch (e: Exception) {
+        } catch (t: Throwable) {
             // Ignored on platforms or states where tile is not active
         }
     }
