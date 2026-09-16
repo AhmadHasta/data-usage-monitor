@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Data Usage Monitor</string>
+    <string name="tile_desc">Shows today data usage at a glance</string>
+    <string name="tile_label">Data Usage</string>
+    <style name="Theme.DataUsageMonitor" parent="android:Theme.Material.Light.NoActionBar">
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+    </style>
+</resources>

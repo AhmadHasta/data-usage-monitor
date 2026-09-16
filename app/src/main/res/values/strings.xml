@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Data Usage Monitor</string>
+    <string name="tile_label">Data Usage</string>
+    <string name="tile_desc">Shows today data usage at a glance</string>
+</resources>

@@ -1,0 +1,19 @@
+{
+    "logs": [
+        {
+            "outputFile": "com.hastaa.datausagemonitor.app-mergeDebugResources-49:/values-v30/values-v30.xml",
+            "map": [
+                {
+                    "source": "/Users/mac/.gradle/caches/9.1.0/transforms/5c930664d298f9467fe3802f063b05bd/transformed/material3-release/res/values-v30/values-v30.xml",
+                    "from": {
+                        "startLines": "2",
+                        "startColumns": "4",
+                        "startOffsets": "55",
+                        "endColumns": "72",
+                        "endOffsets": "123"
+                    }
+                }
+            ]
+        }
+    ]
+}
