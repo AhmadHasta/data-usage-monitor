@@ -10,7 +10,9 @@ import com.hastaa.datausagemonitor.MainActivity
 import com.hastaa.datausagemonitor.R
 import com.hastaa.datausagemonitor.data.repository.NetworkUsageRepository
 import com.hastaa.datausagemonitor.domain.model.UsagePeriod
+import com.hastaa.datausagemonitor.util.ActiveNetworkType
 import com.hastaa.datausagemonitor.util.ByteFormatter
+import com.hastaa.datausagemonitor.util.NetworkTypeHelper
 import com.hastaa.datausagemonitor.util.PermissionHelper
 import com.hastaa.datausagemonitor.util.TileIconGenerator
 import kotlinx.coroutines.CoroutineScope
@@ -21,7 +23,8 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 
 /**
- * Quick Settings Tile Service that presents today's total network usage at a glance.
+ * Quick Settings Tile Service that dynamically presents today's network usage
+ * based on the active connection (Mobile Data vs. Wi-Fi).
  * Utilizes Active Tile mode with cached fallback for instant rendering.
  */
 class DataUsageTileService : TileService() {
@@ -32,17 +35,28 @@ class DataUsageTileService : TileService() {
 
     override fun onStartListening() {
         super.onStartListening()
-        // 1. Immediately display cached value to prevent lag in Quick Settings UI
+        val networkType = NetworkTypeHelper.getActiveNetworkType(this)
+
+        // 1. Immediately display cached value for active network to prevent lag
         serviceScope.launch {
             val cached = repository.getCachedTodayUsage()
-            applyTileState(cached.totalBytes)
+            val bytesToShow = when (networkType) {
+                ActiveNetworkType.WIFI -> cached.wifiBytes
+                ActiveNetworkType.MOBILE, ActiveNetworkType.OFFLINE -> cached.mobileBytes
+            }
+            applyTileState(bytesToShow, networkType)
         }
 
         // 2. Perform lightweight background device summary query to keep tile up-to-date
         refreshJob?.cancel()
         refreshJob = serviceScope.launch {
             val summary = repository.getDeviceSummary(UsagePeriod.TODAY)
-            applyTileState(summary.totalBytes)
+            val currentNetwork = NetworkTypeHelper.getActiveNetworkType(this@DataUsageTileService)
+            val bytesToShow = when (currentNetwork) {
+                ActiveNetworkType.WIFI -> summary.wifiBytes
+                ActiveNetworkType.MOBILE, ActiveNetworkType.OFFLINE -> summary.mobileBytes
+            }
+            applyTileState(bytesToShow, currentNetwork)
         }
     }
 
@@ -76,7 +90,7 @@ class DataUsageTileService : TileService() {
         super.onDestroy()
     }
 
-    private fun applyTileState(todayBytes: Long) {
+    private fun applyTileState(todayBytes: Long, networkType: ActiveNetworkType) {
         val tile = qsTile ?: return
 
         if (!PermissionHelper.hasUsageAccess(this)) {
@@ -95,20 +109,24 @@ class DataUsageTileService : TileService() {
         }
 
         val formatted = ByteFormatter.formatBytes(todayBytes)
-
-        tile.state = Tile.STATE_ACTIVE
-        // Setting label to formatted value ensures that launchers/OEMs with 1 line show the number
-        tile.label = formatted
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            tile.subtitle = "Today"
+        val networkLabel = when (networkType) {
+            ActiveNetworkType.WIFI -> "Wi-Fi"
+            ActiveNetworkType.MOBILE -> "Mobile"
+            ActiveNetworkType.OFFLINE -> "Offline"
         }
 
-        // Generate dynamic icon with the number and unit so that on Xiaomi / HyperOS / MIUI
-        // (where the Control Center circular buttons omit text labels), the usage is rendered
-        // directly inside the tile circle!
+        tile.state = Tile.STATE_ACTIVE
+        // Label includes network type so one-line launcher panels show both (e.g. "1.24 GB Mobile")
+        tile.label = "$formatted $networkLabel"
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            tile.subtitle = "$networkLabel Today"
+        }
+
+        // Generate dynamic icon with active network indicator (cellular bars vs wifi arc)
+        // and exact numbers so that HyperOS / MIUI renders it directly inside the circle
         try {
-            tile.icon = TileIconGenerator.createUsageIcon(todayBytes)
+            tile.icon = TileIconGenerator.createUsageIcon(todayBytes, networkType)
         } catch (e: Exception) {
             tile.icon = Icon.createWithResource(this, R.drawable.ic_tile_data_usage)
         }
