@@ -1,8 +1,0 @@
-com.hastaa.datausagemonitor
-drawable ic_launcher_background
-drawable ic_launcher_foreground
-drawable ic_tile_data_usage
-string app_name
-string tile_desc
-string tile_label
-style Theme_DataUsageMonitor

@@ -5,10 +5,14 @@ import android.content.Intent
 import android.os.Build
 import android.service.quicksettings.Tile
 import android.service.quicksettings.TileService
+import android.graphics.drawable.Icon
 import com.hastaa.datausagemonitor.MainActivity
+import com.hastaa.datausagemonitor.R
 import com.hastaa.datausagemonitor.data.repository.NetworkUsageRepository
 import com.hastaa.datausagemonitor.domain.model.UsagePeriod
 import com.hastaa.datausagemonitor.util.ByteFormatter
+import com.hastaa.datausagemonitor.util.PermissionHelper
+import com.hastaa.datausagemonitor.util.TileIconGenerator
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -74,16 +78,39 @@ class DataUsageTileService : TileService() {
 
     private fun applyTileState(todayBytes: Long) {
         val tile = qsTile ?: return
+
+        if (!PermissionHelper.hasUsageAccess(this)) {
+            tile.state = Tile.STATE_INACTIVE
+            tile.label = "Need Access"
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                tile.subtitle = "Tap to setup"
+            }
+            try {
+                tile.icon = TileIconGenerator.createPermissionIcon()
+            } catch (e: Exception) {
+                tile.icon = Icon.createWithResource(this, R.drawable.ic_tile_data_usage)
+            }
+            tile.updateTile()
+            return
+        }
+
         val formatted = ByteFormatter.formatBytes(todayBytes)
 
         tile.state = Tile.STATE_ACTIVE
-        tile.label = "Data Usage"
+        // Setting label to formatted value ensures that launchers/OEMs with 1 line show the number
+        tile.label = formatted
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            tile.subtitle = "$formatted Today"
-        } else {
-            // For API 26-28 where subtitle is not supported, label includes the number
-            tile.label = "$formatted Today"
+            tile.subtitle = "Today"
+        }
+
+        // Generate dynamic icon with the number and unit so that on Xiaomi / HyperOS / MIUI
+        // (where the Control Center circular buttons omit text labels), the usage is rendered
+        // directly inside the tile circle!
+        try {
+            tile.icon = TileIconGenerator.createUsageIcon(todayBytes)
+        } catch (e: Exception) {
+            tile.icon = Icon.createWithResource(this, R.drawable.ic_tile_data_usage)
         }
 
         tile.updateTile()
