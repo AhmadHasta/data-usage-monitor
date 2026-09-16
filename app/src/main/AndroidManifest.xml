@@ -2,6 +2,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <!-- Standard network state permission to query whether Wi-Fi or Cellular is active -->
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
     <!-- Special permission required for NetworkStatsManager per-app queries -->
     <uses-permission
         android:name="android.permission.PACKAGE_USAGE_STATS"

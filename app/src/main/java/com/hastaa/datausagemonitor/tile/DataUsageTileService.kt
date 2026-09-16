@@ -35,28 +35,40 @@ class DataUsageTileService : TileService() {
 
     override fun onStartListening() {
         super.onStartListening()
-        val networkType = NetworkTypeHelper.getActiveNetworkType(this)
+        try {
+            val networkType = NetworkTypeHelper.getActiveNetworkType(this)
 
-        // 1. Immediately display cached value for active network to prevent lag
-        serviceScope.launch {
-            val cached = repository.getCachedTodayUsage()
-            val bytesToShow = when (networkType) {
-                ActiveNetworkType.WIFI -> cached.wifiBytes
-                ActiveNetworkType.MOBILE, ActiveNetworkType.OFFLINE -> cached.mobileBytes
+            // 1. Immediately display cached value for active network to prevent lag
+            serviceScope.launch {
+                try {
+                    val cached = repository.getCachedTodayUsage()
+                    val bytesToShow = when (networkType) {
+                        ActiveNetworkType.WIFI -> cached.wifiBytes
+                        ActiveNetworkType.MOBILE, ActiveNetworkType.OFFLINE -> cached.mobileBytes
+                    }
+                    applyTileState(bytesToShow, networkType)
+                } catch (t: Throwable) {
+                    // Safe fallback
+                }
             }
-            applyTileState(bytesToShow, networkType)
-        }
 
-        // 2. Perform lightweight background device summary query to keep tile up-to-date
-        refreshJob?.cancel()
-        refreshJob = serviceScope.launch {
-            val summary = repository.getDeviceSummary(UsagePeriod.TODAY)
-            val currentNetwork = NetworkTypeHelper.getActiveNetworkType(this@DataUsageTileService)
-            val bytesToShow = when (currentNetwork) {
-                ActiveNetworkType.WIFI -> summary.wifiBytes
-                ActiveNetworkType.MOBILE, ActiveNetworkType.OFFLINE -> summary.mobileBytes
+            // 2. Perform lightweight background device summary query to keep tile up-to-date
+            refreshJob?.cancel()
+            refreshJob = serviceScope.launch {
+                try {
+                    val summary = repository.getDeviceSummary(UsagePeriod.TODAY)
+                    val currentNetwork = NetworkTypeHelper.getActiveNetworkType(this@DataUsageTileService)
+                    val bytesToShow = when (currentNetwork) {
+                        ActiveNetworkType.WIFI -> summary.wifiBytes
+                        ActiveNetworkType.MOBILE, ActiveNetworkType.OFFLINE -> summary.mobileBytes
+                    }
+                    applyTileState(bytesToShow, currentNetwork)
+                } catch (t: Throwable) {
+                    // Safe fallback
+                }
             }
-            applyTileState(bytesToShow, currentNetwork)
+        } catch (t: Throwable) {
+            // Guard against any unexpected system framework exceptions
         }
     }
 
@@ -67,21 +79,31 @@ class DataUsageTileService : TileService() {
 
     override fun onClick() {
         super.onClick()
-        val launchIntent = Intent(this, MainActivity::class.java).apply {
-            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
-        }
+        try {
+            val launchIntent = Intent(this, MainActivity::class.java).apply {
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
+            }
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-            val pendingIntent = PendingIntent.getActivity(
-                this,
-                0,
-                launchIntent,
-                PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
-            )
-            startActivityAndCollapse(pendingIntent)
-        } else {
-            @Suppress("DEPRECATION")
-            startActivityAndCollapse(launchIntent)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                val pendingIntent = PendingIntent.getActivity(
+                    this,
+                    0,
+                    launchIntent,
+                    PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+                )
+                startActivityAndCollapse(pendingIntent)
+            } else {
+                @Suppress("DEPRECATION")
+                startActivityAndCollapse(launchIntent)
+            }
+        } catch (t: Throwable) {
+            // Fallback for OEMs with non-standard TileService activity launcher behavior
+            try {
+                val fallbackIntent = Intent(this, MainActivity::class.java).apply {
+                    flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                }
+                startActivity(fallbackIntent)
+            } catch (ignored: Throwable) {}
         }
     }
 
