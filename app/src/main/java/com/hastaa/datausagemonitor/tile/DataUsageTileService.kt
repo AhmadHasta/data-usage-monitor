@@ -20,12 +20,14 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 
 /**
  * Quick Settings Tile Service that dynamically presents today's network usage
  * based on the active connection (Mobile Data vs. Wi-Fi).
- * Utilizes Active Tile mode with cached fallback for instant rendering.
+ * Automatically refreshes on panel expansion and periodically while visible.
  */
 class DataUsageTileService : TileService() {
 
@@ -36,35 +38,38 @@ class DataUsageTileService : TileService() {
     override fun onStartListening() {
         super.onStartListening()
         try {
-            val networkType = NetworkTypeHelper.getActiveNetworkType(this)
+            val initialNetworkType = NetworkTypeHelper.getActiveNetworkType(this)
 
             // 1. Immediately display cached value for active network to prevent lag
             serviceScope.launch {
                 try {
                     val cached = repository.getCachedTodayUsage()
-                    val bytesToShow = when (networkType) {
+                    val bytesToShow = when (initialNetworkType) {
                         ActiveNetworkType.WIFI -> cached.wifiBytes
                         ActiveNetworkType.MOBILE, ActiveNetworkType.OFFLINE -> cached.mobileBytes
                     }
-                    applyTileState(bytesToShow, networkType)
+                    applyTileState(bytesToShow, initialNetworkType)
                 } catch (t: Throwable) {
                     // Safe fallback
                 }
             }
 
-            // 2. Perform lightweight background device summary query to keep tile up-to-date
+            // 2. Refresh immediately and periodically every 5 seconds while panel is visible
             refreshJob?.cancel()
             refreshJob = serviceScope.launch {
-                try {
-                    val summary = repository.getDeviceSummary(UsagePeriod.TODAY)
-                    val currentNetwork = NetworkTypeHelper.getActiveNetworkType(this@DataUsageTileService)
-                    val bytesToShow = when (currentNetwork) {
-                        ActiveNetworkType.WIFI -> summary.wifiBytes
-                        ActiveNetworkType.MOBILE, ActiveNetworkType.OFFLINE -> summary.mobileBytes
+                while (isActive) {
+                    try {
+                        val summary = repository.getDeviceSummary(UsagePeriod.TODAY)
+                        val currentNetwork = NetworkTypeHelper.getActiveNetworkType(this@DataUsageTileService)
+                        val bytesToShow = when (currentNetwork) {
+                            ActiveNetworkType.WIFI -> summary.wifiBytes
+                            ActiveNetworkType.MOBILE, ActiveNetworkType.OFFLINE -> summary.mobileBytes
+                        }
+                        applyTileState(bytesToShow, currentNetwork)
+                    } catch (t: Throwable) {
+                        // Safe fallback
                     }
-                    applyTileState(bytesToShow, currentNetwork)
-                } catch (t: Throwable) {
-                    // Safe fallback
+                    delay(5000L)
                 }
             }
         } catch (t: Throwable) {
