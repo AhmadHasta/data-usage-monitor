@@ -4,8 +4,10 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -39,26 +41,32 @@ fun NetworkMetricsRow(
     modifier: Modifier = Modifier
 ) {
     Row(
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier
+            .fillMaxWidth()
+            .height(IntrinsicSize.Min),
         horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         NetworkMetricCard(
-            title = "Mobile Data",
+            title = "Mobile\nData",
             bytes = mobileBytes,
             icon = Icons.Rounded.SignalCellularAlt,
             iconContainerColor = MaterialTheme.colorScheme.primaryContainer,
             iconColor = MaterialTheme.colorScheme.onPrimaryContainer,
             accentColor = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.weight(1f)
+            modifier = Modifier
+                .weight(1f)
+                .fillMaxHeight()
         )
         NetworkMetricCard(
-            title = "Wi-Fi Network",
+            title = "Wi-Fi\nNetwork",
             bytes = wifiBytes,
             icon = Icons.Rounded.Wifi,
             iconContainerColor = MaterialTheme.colorScheme.tertiaryContainer,
             iconColor = MaterialTheme.colorScheme.onTertiaryContainer,
             accentColor = MaterialTheme.colorScheme.tertiary,
-            modifier = Modifier.weight(1f)
+            modifier = Modifier
+                .weight(1f)
+                .fillMaxHeight()
         )
     }
 }
@@ -83,7 +91,10 @@ fun NetworkMetricCard(
         )
     ) {
         Column(
-            modifier = Modifier.padding(18.dp)
+            modifier = Modifier
+                .fillMaxHeight()
+                .padding(18.dp),
+            verticalArrangement = Arrangement.SpaceBetween
         ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically
