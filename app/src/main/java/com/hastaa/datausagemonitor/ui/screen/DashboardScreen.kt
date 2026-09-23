@@ -24,6 +24,7 @@ import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.DataUsage
 import androidx.compose.material.icons.rounded.Refresh
 import androidx.compose.material.icons.rounded.Search
+import androidx.compose.material.icons.rounded.Tune
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -68,6 +69,7 @@ fun DashboardScreen(
     onNetworkFilterChanged: (NetworkFilter) -> Unit,
     onDismissTileBanner: () -> Unit,
     onRefresh: () -> Unit,
+    onOpenTileSettings: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     var isSearchExpanded by remember { mutableStateOf(false) }
@@ -103,6 +105,13 @@ fun DashboardScreen(
                     }
                 },
                 actions = {
+                    IconButton(onClick = onOpenTileSettings) {
+                        Icon(
+                            imageVector = Icons.Rounded.Tune,
+                            contentDescription = "Customize Tile",
+                            tint = MaterialTheme.colorScheme.onSurface
+                        )
+                    }
                     IconButton(onClick = {
                         onRefresh()
                         com.hastaa.datausagemonitor.widget.DataUsageAppWidgetProvider.notifyDataChanged(context)
@@ -142,6 +151,7 @@ fun DashboardScreen(
                 item(key = "qs_banner") {
                     QuickSettingsBanner(
                         onDismiss = onDismissTileBanner,
+                        onCustomizeTile = onOpenTileSettings,
                         modifier = Modifier.animateItem()
                     )
                 }

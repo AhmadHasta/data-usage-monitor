@@ -43,6 +43,7 @@ import com.hastaa.datausagemonitor.tile.DataUsageTileService
 @Composable
 fun QuickSettingsBanner(
     onDismiss: () -> Unit,
+    onCustomizeTile: (() -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
@@ -85,7 +86,7 @@ fun QuickSettingsBanner(
                     )
                     Spacer(modifier = Modifier.height(2.dp))
                     Text(
-                        text = "Monitor your data consumption from your Home Screen Widget or Quick Settings Tile.",
+                        text = "Track data usage from your Home Screen Widget or Quick Settings Tile.",
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -107,8 +108,22 @@ fun QuickSettingsBanner(
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.End
+                horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.End),
+                verticalAlignment = Alignment.CenterVertically
             ) {
+                if (onCustomizeTile != null) {
+                    androidx.compose.material3.OutlinedButton(
+                        onClick = onCustomizeTile,
+                        shape = RoundedCornerShape(12.dp)
+                    ) {
+                        Text(
+                            text = "Customize",
+                            style = MaterialTheme.typography.labelLarge,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                }
+
                 FilledTonalButton(
                     onClick = {
                         requestAddQuickSettingsTile(context) { message ->
@@ -119,7 +134,7 @@ fun QuickSettingsBanner(
                     shape = RoundedCornerShape(12.dp)
                 ) {
                     Text(
-                        text = "Add to Quick Settings",
+                        text = "Add Tile",
                         style = MaterialTheme.typography.labelLarge,
                         fontWeight = FontWeight.Bold
                     )
@@ -137,7 +152,7 @@ private fun requestAddQuickSettingsTile(
         try {
             val statusBarManager = context.getSystemService(StatusBarManager::class.java)
             if (statusBarManager == null) {
-                onFeedback("Silakan tambahkan tile melalui Control Center -> Edit")
+                onFeedback("Please add the tile via Control Center -> Edit")
                 return
             }
             val component = ComponentName(context, DataUsageTileService::class.java)
@@ -150,24 +165,23 @@ private fun requestAddQuickSettingsTile(
                 try {
                     when (result) {
                         StatusBarManager.TILE_ADD_REQUEST_RESULT_TILE_ALREADY_ADDED -> {
-                            onFeedback("Tile Data Usage sudah aktif di Quick Settings")
+                            onFeedback("Data Usage tile is already in Quick Settings")
                         }
                         StatusBarManager.TILE_ADD_REQUEST_RESULT_TILE_ADDED -> {
-                            onFeedback("Tile berhasil ditambahkan!")
+                            onFeedback("Tile added successfully!")
                         }
                         else -> {
-                            onFeedback("Buka Control Center dan tekan Edit untuk mengatur tile")
+                            onFeedback("Open Quick Settings and tap Edit to add the tile")
                         }
                     }
                 } catch (t: Throwable) {
-                    // Shield against any callback dispatch exceptions
+                    // Shield against callback dispatch exceptions
                 }
             }
         } catch (t: Throwable) {
-            // Xiaomi HyperOS / MIUI or custom OEM ROM fallback
-            onFeedback("Tile sudah tersedia di menu Edit Control Center")
+            onFeedback("Tile is available in Quick Settings Edit menu")
         }
     } else {
-        onFeedback("Tarik panel Quick Settings lalu tekan Edit untuk menambahkan tile")
+        onFeedback("Swipe down Quick Settings and tap Edit to add the tile")
     }
 }

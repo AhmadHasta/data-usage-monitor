@@ -24,6 +24,11 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 
+import com.hastaa.datausagemonitor.data.local.TileConfig
+import com.hastaa.datausagemonitor.data.local.TileIconChoice
+import com.hastaa.datausagemonitor.data.local.TilePreferences
+import com.hastaa.datausagemonitor.data.local.TileTextLayout
+
 /**
  * Quick Settings Tile Service that dynamically presents today's network usage
  * based on the active connection (Mobile Data vs. Wi-Fi).
@@ -34,6 +39,7 @@ class DataUsageTileService : TileService() {
     private val serviceScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
     private var refreshJob: Job? = null
     private val repository by lazy { NetworkUsageRepository(this) }
+    private val tilePreferences by lazy { TilePreferences(this) }
 
     override fun onStartListening() {
         super.onStartListening()
@@ -43,12 +49,13 @@ class DataUsageTileService : TileService() {
             // 1. Immediately display cached value for active network to prevent lag
             serviceScope.launch {
                 try {
+                    val config = tilePreferences.getTileConfig()
                     val cached = repository.getCachedTodayUsage()
                     val bytesToShow = when (initialNetworkType) {
                         ActiveNetworkType.WIFI -> cached.wifiBytes
                         ActiveNetworkType.MOBILE, ActiveNetworkType.OFFLINE -> cached.mobileBytes
                     }
-                    applyTileState(bytesToShow, initialNetworkType)
+                    applyTileState(bytesToShow, initialNetworkType, config)
                 } catch (t: Throwable) {
                     // Safe fallback
                 }
@@ -59,13 +66,14 @@ class DataUsageTileService : TileService() {
             refreshJob = serviceScope.launch {
                 while (isActive) {
                     try {
-                        val summary = repository.getDeviceSummary(UsagePeriod.TODAY)
+                        val config = tilePreferences.getTileConfig()
+                        val summary = repository.getDeviceSummary(config.period)
                         val currentNetwork = NetworkTypeHelper.getActiveNetworkType(this@DataUsageTileService)
                         val bytesToShow = when (currentNetwork) {
                             ActiveNetworkType.WIFI -> summary.wifiBytes
                             ActiveNetworkType.MOBILE, ActiveNetworkType.OFFLINE -> summary.mobileBytes
                         }
-                        applyTileState(bytesToShow, currentNetwork)
+                        applyTileState(bytesToShow, currentNetwork, config)
                     } catch (t: Throwable) {
                         // Safe fallback
                     }
@@ -117,7 +125,11 @@ class DataUsageTileService : TileService() {
         super.onDestroy()
     }
 
-    private fun applyTileState(todayBytes: Long, networkType: ActiveNetworkType) {
+    private fun applyTileState(
+        bytesToShow: Long,
+        networkType: ActiveNetworkType,
+        config: TileConfig = TileConfig()
+    ) {
         val tile = qsTile ?: return
 
         if (!PermissionHelper.hasUsageAccess(this)) {
@@ -135,25 +147,43 @@ class DataUsageTileService : TileService() {
             return
         }
 
-        val formatted = ByteFormatter.formatBytes(todayBytes)
-        val networkLabel = when (networkType) {
-            ActiveNetworkType.WIFI -> "Wi-Fi"
-            ActiveNetworkType.MOBILE -> "Mobile"
-            ActiveNetworkType.OFFLINE -> "Offline"
+        val formatted = ByteFormatter.formatBytes(bytesToShow)
+        val networkLabel = when (config.iconChoice) {
+            TileIconChoice.WIFI -> "Wi-Fi"
+            TileIconChoice.CELLULAR -> "Mobile"
+            TileIconChoice.DATA_USAGE -> "Data"
+            TileIconChoice.AUTO -> when (networkType) {
+                ActiveNetworkType.WIFI -> "Wi-Fi"
+                ActiveNetworkType.MOBILE -> "Mobile"
+                ActiveNetworkType.OFFLINE -> "Offline"
+            }
         }
 
         tile.state = Tile.STATE_ACTIVE
-        // Label includes network type so one-line launcher panels show both (e.g. "1.24 GB Mobile")
-        tile.label = "$formatted $networkLabel"
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            tile.subtitle = "$networkLabel Today"
+        when (config.textLayout) {
+            TileTextLayout.SINGLE_LINE -> {
+                tile.label = "$formatted $networkLabel"
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                    tile.subtitle = ""
+                }
+            }
+            TileTextLayout.DUAL_LINE_NETWORK_FIRST -> {
+                tile.label = "$networkLabel\n$formatted"
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                    tile.subtitle = formatted
+                }
+            }
+            TileTextLayout.DUAL_LINE_METRIC_FIRST -> {
+                tile.label = "$formatted\n$networkLabel"
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                    tile.subtitle = "$networkLabel ${config.period.label}"
+                }
+            }
         }
 
-        // Generate dynamic icon with active network indicator (cellular bars vs wifi arc)
-        // and exact numbers so that HyperOS / MIUI renders it directly inside the circle
         try {
-            tile.icon = TileIconGenerator.createUsageIcon(todayBytes, networkType)
+            tile.icon = TileIconGenerator.createConfiguredIcon(bytesToShow, networkType, config)
         } catch (e: Exception) {
             tile.icon = Icon.createWithResource(this, R.drawable.ic_tile_data_usage)
         }
