@@ -3,6 +3,7 @@ package com.hastaa.datausagemonitor.ui.theme
 import android.app.Activity
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.dynamicDarkColorScheme
@@ -15,8 +16,83 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
+import com.hastaa.datausagemonitor.data.local.AppTheme
 
-private val LightColorScheme = lightColorScheme(
+// ==========================================
+// 1. Cyber Neon Color Schemes (Default Theme)
+// ==========================================
+val CyberNeonDarkColorScheme = darkColorScheme(
+    primary = CyanNeon,
+    onPrimary = BackgroundDark,
+    primaryContainer = CyanNeonSubtle,
+    onPrimaryContainer = CyanNeon,
+    secondary = VioletNeon,
+    onSecondary = BackgroundDark,
+    secondaryContainer = VioletNeonSubtle,
+    onSecondaryContainer = VioletNeon,
+    tertiary = EmeraldNeon,
+    onTertiary = BackgroundDark,
+    tertiaryContainer = EmeraldNeonSubtle,
+    onTertiaryContainer = EmeraldNeon,
+    error = Color(0xFFFF5252),
+    onError = Color(0xFF370000),
+    errorContainer = Color(0x33FF5252),
+    onErrorContainer = Color(0xFFFFB4AB),
+    background = BackgroundDark,
+    onBackground = TextPrimary,
+    surface = SurfaceDark,
+    onSurface = TextPrimary,
+    surfaceVariant = SurfaceVariantDark,
+    onSurfaceVariant = TextSecondary,
+    outline = SurfaceBorderDark,
+    outlineVariant = SurfaceVariantDark,
+    surfaceDim = BackgroundDark,
+    surfaceBright = SurfaceVariantDark,
+    surfaceContainerLowest = BackgroundDark,
+    surfaceContainerLow = SurfaceSubtle,
+    surfaceContainer = SurfaceDark,
+    surfaceContainerHigh = SurfaceVariantDark,
+    surfaceContainerHighest = SurfaceBorderDark
+)
+
+val CyberNeonLightColorScheme = lightColorScheme(
+    primary = Color(0xFF00838F),
+    onPrimary = SurfaceLight,
+    primaryContainer = Color(0xFFE0F7FA),
+    onPrimaryContainer = Color(0xFF006064),
+    secondary = Color(0xFF7C4DFF),
+    onSecondary = SurfaceLight,
+    secondaryContainer = Color(0xFFEDE7F6),
+    onSecondaryContainer = Color(0xFF4A148C),
+    tertiary = Color(0xFF059669),
+    onTertiary = SurfaceLight,
+    tertiaryContainer = Color(0xFFD1FAE5),
+    onTertiaryContainer = Color(0xFF065F46),
+    error = Color(0xFFBA1A1A),
+    onError = Color(0xFFFFFFFF),
+    errorContainer = Color(0xFFFFDAD6),
+    onErrorContainer = Color(0xFF410002),
+    background = BackgroundLight,
+    onBackground = TextPrimaryLight,
+    surface = SurfaceLight,
+    onSurface = TextPrimaryLight,
+    surfaceVariant = SurfaceVariantLight,
+    onSurfaceVariant = TextSecondaryLight,
+    outline = SurfaceBorderLight,
+    outlineVariant = SurfaceVariantLight,
+    surfaceDim = Color(0xFFE2E8F0),
+    surfaceBright = SurfaceLight,
+    surfaceContainerLowest = Color(0xFFFFFFFF),
+    surfaceContainerLow = Color(0xFFF8FAFC),
+    surfaceContainer = SurfaceLight,
+    surfaceContainerHigh = Color(0xFFF1F5F9),
+    surfaceContainerHighest = Color(0xFFE2E8F0)
+)
+
+// ==========================================
+// 2. Material Design 3 Expressive Color Schemes
+// ==========================================
+val M3ExpressiveLightColorScheme = lightColorScheme(
     primary = md_theme_light_primary,
     onPrimary = md_theme_light_onPrimary,
     primaryContainer = md_theme_light_primaryContainer,
@@ -50,7 +126,7 @@ private val LightColorScheme = lightColorScheme(
     surfaceContainerHighest = md_theme_light_surfaceContainerHighest
 )
 
-private val DarkColorScheme = darkColorScheme(
+val M3ExpressiveDarkColorScheme = darkColorScheme(
     primary = md_theme_dark_primary,
     onPrimary = md_theme_dark_onPrimary,
     primaryContainer = md_theme_dark_primaryContainer,
@@ -86,17 +162,23 @@ private val DarkColorScheme = darkColorScheme(
 
 @Composable
 fun DataUsageMonitorTheme(
+    appTheme: AppTheme = AppTheme.CYBER_NEON,
     darkTheme: Boolean = isSystemInDarkTheme(),
     dynamicColor: Boolean = true,
     content: @Composable () -> Unit
 ) {
     val context = LocalContext.current
-    val colorScheme = when {
-        dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
-            if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
+    val colorScheme: ColorScheme = when (appTheme) {
+        AppTheme.CYBER_NEON -> {
+            if (darkTheme) CyberNeonDarkColorScheme else CyberNeonLightColorScheme
         }
-        darkTheme -> DarkColorScheme
-        else -> LightColorScheme
+        AppTheme.MD3_EXPRESSIVE -> {
+            if (dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
+            } else {
+                if (darkTheme) M3ExpressiveDarkColorScheme else M3ExpressiveLightColorScheme
+            }
+        }
     }
 
     val view = LocalView.current

@@ -18,15 +18,18 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.Add
+import androidx.compose.material.icons.rounded.Bolt
 import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material.icons.rounded.DataUsage
 import androidx.compose.material.icons.rounded.DateRange
 import androidx.compose.material.icons.rounded.DonutLarge
 import androidx.compose.material.icons.rounded.Numbers
+import androidx.compose.material.icons.rounded.Palette
 import androidx.compose.material.icons.rounded.Refresh
 import androidx.compose.material.icons.rounded.Remove
 import androidx.compose.material.icons.rounded.SignalCellularAlt
@@ -66,11 +69,16 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.hastaa.datausagemonitor.data.local.AppTheme
 import com.hastaa.datausagemonitor.data.local.TileConfig
 import com.hastaa.datausagemonitor.data.local.TileContentStyle
 import com.hastaa.datausagemonitor.data.local.TileIconChoice
 import com.hastaa.datausagemonitor.data.local.TileTextLayout
 import com.hastaa.datausagemonitor.domain.model.UsagePeriod
+import com.hastaa.datausagemonitor.ui.theme.CyanNeon
+import com.hastaa.datausagemonitor.ui.theme.VioletNeon
+import com.hastaa.datausagemonitor.ui.theme.md_theme_dark_primary
+import com.hastaa.datausagemonitor.ui.theme.md_theme_light_primary
 import kotlin.math.roundToInt
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -123,6 +131,24 @@ fun TileSettingsScreen(
             contentPadding = PaddingValues(horizontal = 20.dp, vertical = 12.dp),
             verticalArrangement = Arrangement.spacedBy(20.dp)
         ) {
+            item(key = "section_app_theme") {
+                SectionHeader(
+                    title = "App Theme",
+                    subtitle = "Select application visual style and color system",
+                    icon = Icons.Rounded.Palette
+                )
+                Spacer(modifier = Modifier.height(10.dp))
+                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    AppTheme.values().forEach { theme ->
+                        AppThemeChoiceCard(
+                            theme = theme,
+                            isSelected = state.appTheme == theme,
+                            onSelect = { viewModel.setAppTheme(theme) }
+                        )
+                    }
+                }
+            }
+
             item(key = "section_content_style") {
                 SectionHeader(
                     title = "Tile Circle Content",
@@ -599,6 +625,103 @@ fun TileSettingsScreen(
             item(key = "bottom_space") {
                 Spacer(modifier = Modifier.height(32.dp))
             }
+        }
+    }
+}
+
+@Composable
+private fun AppThemeChoiceCard(
+    theme: AppTheme,
+    isSelected: Boolean,
+    onSelect: () -> Unit
+) {
+    val containerColor by animateColorAsState(
+        targetValue = if (isSelected) MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.55f)
+        else MaterialTheme.colorScheme.surfaceContainerLow,
+        label = "themeBg"
+    )
+
+    Card(
+        onClick = onSelect,
+        shape = RoundedCornerShape(18.dp),
+        colors = CardDefaults.cardColors(containerColor = containerColor),
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(18.dp))
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(44.dp)
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(
+                        if (isSelected) MaterialTheme.colorScheme.primary
+                        else MaterialTheme.colorScheme.surfaceContainerHighest
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = when (theme) {
+                        AppTheme.CYBER_NEON -> Icons.Rounded.Bolt
+                        AppTheme.MD3_EXPRESSIVE -> Icons.Rounded.Palette
+                    },
+                    contentDescription = null,
+                    tint = if (isSelected) MaterialTheme.colorScheme.onPrimary
+                    else MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.size(24.dp)
+                )
+            }
+
+            Spacer(modifier = Modifier.width(14.dp))
+
+            Column(modifier = Modifier.weight(1f)) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        text = theme.label,
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = if (isSelected) FontWeight.Bold else FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                        val (c1, c2) = when (theme) {
+                            AppTheme.CYBER_NEON -> Pair(CyanNeon, VioletNeon)
+                            AppTheme.MD3_EXPRESSIVE -> Pair(md_theme_dark_primary, md_theme_light_primary)
+                        }
+                        Box(
+                            modifier = Modifier
+                                .size(10.dp)
+                                .clip(CircleShape)
+                                .background(c1)
+                        )
+                        Box(
+                            modifier = Modifier
+                                .size(10.dp)
+                                .clip(CircleShape)
+                                .background(c2)
+                        )
+                    }
+                }
+                Spacer(modifier = Modifier.height(2.dp))
+                Text(
+                    text = theme.subtitle,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+
+            RadioButton(
+                selected = isSelected,
+                onClick = onSelect,
+                colors = RadioButtonDefaults.colors(
+                    selectedColor = MaterialTheme.colorScheme.primary
+                )
+            )
         }
     }
 }

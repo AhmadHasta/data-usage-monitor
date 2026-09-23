@@ -5,6 +5,8 @@ import android.content.ComponentName
 import android.service.quicksettings.TileService
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.hastaa.datausagemonitor.data.local.AppTheme
+import com.hastaa.datausagemonitor.data.local.ThemePreferences
 import com.hastaa.datausagemonitor.data.local.TileConfig
 import com.hastaa.datausagemonitor.data.local.TileContentStyle
 import com.hastaa.datausagemonitor.data.local.TileIconChoice
@@ -26,12 +28,14 @@ import kotlinx.coroutines.launch
 data class TileSettingsUiState(
     val config: TileConfig = TileConfig(),
     val activeNetwork: ActiveNetworkType = ActiveNetworkType.WIFI,
-    val previewBytes: Long = 7L * 1024 * 1024 * 1024 + 840L * 1024 * 1024
+    val previewBytes: Long = 7L * 1024 * 1024 * 1024 + 840L * 1024 * 1024,
+    val appTheme: AppTheme = AppTheme.CYBER_NEON
 )
 
 class TileSettingsViewModel(application: Application) : AndroidViewModel(application) {
 
     private val tilePrefs = TilePreferences(application)
+    private val themePrefs = ThemePreferences(application)
     private val repository = NetworkUsageRepository(application)
 
     private val _uiState = MutableStateFlow(TileSettingsUiState())
@@ -63,6 +67,12 @@ class TileSettingsViewModel(application: Application) : AndroidViewModel(applica
         viewModelScope.launch {
             val initialConfig = tilePrefs.getTileConfig()
             _uiState.update { it.copy(config = initialConfig) }
+        }
+
+        viewModelScope.launch {
+            themePrefs.appThemeFlow.collect { theme ->
+                _uiState.update { it.copy(appTheme = theme) }
+            }
         }
     }
 
@@ -180,6 +190,12 @@ class TileSettingsViewModel(application: Application) : AndroidViewModel(applica
                     iconStrokeWidthDp = 3
                 )
             }
+        }
+    }
+
+    fun setAppTheme(theme: AppTheme) {
+        viewModelScope.launch {
+            themePrefs.setAppTheme(theme)
         }
     }
 

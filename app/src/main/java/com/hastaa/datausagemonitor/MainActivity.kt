@@ -14,6 +14,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import com.hastaa.datausagemonitor.data.local.AppTheme
+import com.hastaa.datausagemonitor.data.local.ThemePreferences
 import com.hastaa.datausagemonitor.ui.dashboard.DashboardViewModel
 import com.hastaa.datausagemonitor.ui.screen.DashboardScreen
 import com.hastaa.datausagemonitor.ui.screen.TileSettingsScreen
@@ -28,13 +30,16 @@ enum class AppScreen {
 class MainActivity : ComponentActivity() {
 
     private val viewModel: DashboardViewModel by viewModels()
+    private val themePreferences by lazy { ThemePreferences(this) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
         setContent {
-            DataUsageMonitorTheme {
+            val appTheme by themePreferences.appThemeFlow.collectAsState(initial = AppTheme.CYBER_NEON)
+
+            DataUsageMonitorTheme(appTheme = appTheme) {
                 Surface(modifier = Modifier.fillMaxSize()) {
                     val state by viewModel.uiState.collectAsState()
                     var currentScreen by rememberSaveable { mutableStateOf(AppScreen.DASHBOARD) }
