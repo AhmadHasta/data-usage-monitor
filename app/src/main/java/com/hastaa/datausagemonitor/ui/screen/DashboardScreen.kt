@@ -72,6 +72,8 @@ fun DashboardScreen(
 ) {
     var isSearchExpanded by remember { mutableStateOf(false) }
 
+    val context = androidx.compose.ui.platform.LocalContext.current
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -79,8 +81,8 @@ fun DashboardScreen(
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Box(
                             modifier = Modifier
-                                .size(36.dp)
-                                .clip(CircleShape)
+                                .size(38.dp)
+                                .clip(RoundedCornerShape(12.dp))
                                 .background(MaterialTheme.colorScheme.primaryContainer),
                             contentAlignment = Alignment.Center
                         ) {
@@ -101,7 +103,10 @@ fun DashboardScreen(
                     }
                 },
                 actions = {
-                    IconButton(onClick = onRefresh) {
+                    IconButton(onClick = {
+                        onRefresh()
+                        com.hastaa.datausagemonitor.widget.DataUsageAppWidgetProvider.notifyDataChanged(context)
+                    }) {
                         if (state.isRefreshing) {
                             CircularProgressIndicator(
                                 modifier = Modifier.size(20.dp),

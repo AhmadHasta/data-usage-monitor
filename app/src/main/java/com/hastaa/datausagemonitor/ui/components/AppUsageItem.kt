@@ -80,14 +80,14 @@ fun AppUsageItem(
                         bitmap = iconBitmap.asImageBitmap(),
                         contentDescription = app.appName,
                         modifier = Modifier
-                            .size(44.dp)
-                            .clip(RoundedCornerShape(12.dp))
+                            .size(46.dp)
+                            .clip(RoundedCornerShape(14.dp))
                     )
                 } else {
                     Box(
                         modifier = Modifier
-                            .size(44.dp)
-                            .clip(RoundedCornerShape(12.dp))
+                            .size(46.dp)
+                            .clip(RoundedCornerShape(14.dp))
                             .background(MaterialTheme.colorScheme.primaryContainer),
                         contentAlignment = Alignment.Center
                     ) {

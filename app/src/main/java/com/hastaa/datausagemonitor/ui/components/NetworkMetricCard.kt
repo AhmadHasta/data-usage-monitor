@@ -90,8 +90,8 @@ fun NetworkMetricCard(
             ) {
                 Box(
                     modifier = Modifier
-                        .size(36.dp)
-                        .clip(CircleShape)
+                        .size(40.dp)
+                        .clip(RoundedCornerShape(14.dp))
                         .background(iconContainerColor),
                     contentAlignment = Alignment.Center
                 ) {
@@ -99,7 +99,7 @@ fun NetworkMetricCard(
                         imageVector = icon,
                         contentDescription = null,
                         tint = iconColor,
-                        modifier = Modifier.size(20.dp)
+                        modifier = Modifier.size(22.dp)
                     )
                 }
                 Spacer(modifier = Modifier.width(10.dp))
