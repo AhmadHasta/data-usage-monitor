@@ -1,11 +1,7 @@
 package com.hastaa.datausagemonitor.ui.screen
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -23,13 +19,17 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.DataUsage
-import androidx.compose.material.icons.rounded.FilterList
 import androidx.compose.material.icons.rounded.Refresh
 import androidx.compose.material.icons.rounded.Search
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -50,7 +50,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.hastaa.datausagemonitor.domain.model.UsagePeriod
 import com.hastaa.datausagemonitor.ui.components.AppUsageItem
 import com.hastaa.datausagemonitor.ui.components.HeroUsageCard
@@ -59,10 +58,6 @@ import com.hastaa.datausagemonitor.ui.components.PeriodSelector
 import com.hastaa.datausagemonitor.ui.components.QuickSettingsBanner
 import com.hastaa.datausagemonitor.ui.dashboard.DashboardUiState
 import com.hastaa.datausagemonitor.ui.dashboard.NetworkFilter
-import com.hastaa.datausagemonitor.ui.theme.CyanNeon
-import com.hastaa.datausagemonitor.ui.theme.SurfaceBorderDark
-import com.hastaa.datausagemonitor.ui.theme.TextSecondary
-import com.hastaa.datausagemonitor.ui.theme.TextTertiary
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -84,16 +79,16 @@ fun DashboardScreen(
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Box(
                             modifier = Modifier
-                                .size(34.dp)
+                                .size(36.dp)
                                 .clip(CircleShape)
-                                .background(CyanNeon.copy(alpha = 0.15f)),
+                                .background(MaterialTheme.colorScheme.primaryContainer),
                             contentAlignment = Alignment.Center
                         ) {
                             Icon(
                                 imageVector = Icons.Rounded.DataUsage,
                                 contentDescription = null,
-                                tint = CyanNeon,
-                                modifier = Modifier.size(20.dp)
+                                tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                                modifier = Modifier.size(22.dp)
                             )
                         }
                         Spacer(modifier = Modifier.width(12.dp))
@@ -101,7 +96,7 @@ fun DashboardScreen(
                             text = "Data Usage Monitor",
                             style = MaterialTheme.typography.titleLarge,
                             fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.onBackground
+                            color = MaterialTheme.colorScheme.onSurface
                         )
                     }
                 },
@@ -110,24 +105,24 @@ fun DashboardScreen(
                         if (state.isRefreshing) {
                             CircularProgressIndicator(
                                 modifier = Modifier.size(20.dp),
-                                color = CyanNeon,
+                                color = MaterialTheme.colorScheme.primary,
                                 strokeWidth = 2.dp
                             )
                         } else {
                             Icon(
                                 imageVector = Icons.Rounded.Refresh,
                                 contentDescription = "Refresh",
-                                tint = MaterialTheme.colorScheme.onBackground
+                                tint = MaterialTheme.colorScheme.onSurface
                             )
                         }
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.background
+                    containerColor = MaterialTheme.colorScheme.surface
                 )
             )
         },
-        containerColor = MaterialTheme.colorScheme.background,
+        containerColor = MaterialTheme.colorScheme.surface,
         modifier = modifier
     ) { innerPadding ->
         LazyColumn(
@@ -186,19 +181,19 @@ fun DashboardScreen(
                                 text = "Application Usage",
                                 style = MaterialTheme.typography.titleLarge,
                                 fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.onBackground
+                                color = MaterialTheme.colorScheme.onSurface
                             )
-                            Spacer(modifier = Modifier.width(8.dp))
+                            Spacer(modifier = Modifier.width(10.dp))
                             Box(
                                 modifier = Modifier
                                     .clip(RoundedCornerShape(8.dp))
-                                    .background(MaterialTheme.colorScheme.surfaceVariant)
+                                    .background(MaterialTheme.colorScheme.surfaceContainerHighest)
                                     .padding(horizontal = 8.dp, vertical = 2.dp)
                             ) {
                                 Text(
                                     text = state.filteredApps.size.toString(),
                                     style = MaterialTheme.typography.labelSmall,
-                                    color = CyanNeon,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                                     fontWeight = FontWeight.Bold
                                 )
                             }
@@ -208,7 +203,7 @@ fun DashboardScreen(
                             Icon(
                                 imageVector = if (isSearchExpanded) Icons.Rounded.Close else Icons.Rounded.Search,
                                 contentDescription = "Toggle Search",
-                                tint = if (isSearchExpanded) CyanNeon else TextSecondary
+                                tint = if (isSearchExpanded) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
                     }
@@ -219,25 +214,37 @@ fun DashboardScreen(
                             value = state.searchQuery,
                             onValueChange = onSearchQueryChanged,
                             placeholder = {
-                                Text("Search applications...", color = TextTertiary)
+                                Text("Search applications...", color = MaterialTheme.colorScheme.onSurfaceVariant)
                             },
                             singleLine = true,
                             colors = TextFieldDefaults.colors(
-                                focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
-                                unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                                focusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+                                unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
                                 focusedIndicatorColor = Color.Transparent,
                                 unfocusedIndicatorColor = Color.Transparent,
-                                cursorColor = CyanNeon
+                                cursorColor = MaterialTheme.colorScheme.primary,
+                                focusedTextColor = MaterialTheme.colorScheme.onSurface,
+                                unfocusedTextColor = MaterialTheme.colorScheme.onSurface
                             ),
                             shape = RoundedCornerShape(14.dp),
+                            trailingIcon = {
+                                if (state.searchQuery.isNotBlank()) {
+                                    IconButton(onClick = { onSearchQueryChanged("") }) {
+                                        Icon(
+                                            imageVector = Icons.Rounded.Close,
+                                            contentDescription = "Clear Search",
+                                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
+                                    }
+                                }
+                            },
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(top = 10.dp)
-                                .border(1.dp, SurfaceBorderDark, RoundedCornerShape(14.dp))
                         )
                     }
 
-                    Spacer(modifier = Modifier.height(10.dp))
+                    Spacer(modifier = Modifier.height(12.dp))
 
                     // Filter Chips (All, Mobile, Wi-Fi)
                     Row(
@@ -245,28 +252,27 @@ fun DashboardScreen(
                     ) {
                         NetworkFilter.values().forEach { filter ->
                             val isSelected = filter == state.networkFilter
-                            Box(
-                                modifier = Modifier
-                                    .clip(RoundedCornerShape(10.dp))
-                                    .background(
-                                        if (isSelected) CyanNeon.copy(alpha = 0.2f)
-                                        else MaterialTheme.colorScheme.surfaceVariant
+                            FilterChip(
+                                selected = isSelected,
+                                onClick = { onNetworkFilterChanged(filter) },
+                                label = {
+                                    Text(
+                                        text = filter.label,
+                                        style = MaterialTheme.typography.labelMedium,
+                                        fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium
                                     )
-                                    .border(
-                                        1.dp,
-                                        if (isSelected) CyanNeon else SurfaceBorderDark,
-                                        RoundedCornerShape(10.dp)
-                                    )
-                                    .clickable { onNetworkFilterChanged(filter) }
-                                    .padding(horizontal = 14.dp, vertical = 6.dp)
-                            ) {
-                                Text(
-                                    text = filter.label,
-                                    style = MaterialTheme.typography.labelSmall,
-                                    fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
-                                    color = if (isSelected) CyanNeon else TextSecondary
-                                )
-                            }
+                                },
+                                leadingIcon = if (isSelected) {
+                                    {
+                                        Icon(
+                                            imageVector = Icons.Rounded.Check,
+                                            contentDescription = null,
+                                            modifier = Modifier.size(18.dp)
+                                        )
+                                    }
+                                } else null,
+                                colors = FilterChipDefaults.filterChipColors()
+                            )
                         }
                     }
                 }
@@ -281,26 +287,32 @@ fun DashboardScreen(
                             .height(180.dp),
                         contentAlignment = Alignment.Center
                     ) {
-                        CircularProgressIndicator(color = CyanNeon)
+                        CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
                     }
                 }
             } else if (state.filteredApps.isEmpty()) {
                 item(key = "empty_state") {
-                    Box(
+                    Card(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(160.dp)
-                            .clip(RoundedCornerShape(18.dp))
-                            .background(MaterialTheme.colorScheme.surfaceVariant),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = if (state.searchQuery.isNotBlank())
-                                "No applications match \"${state.searchQuery}\""
-                            else "No network usage recorded for this period",
-                            style = MaterialTheme.typography.bodyLarge,
-                            color = TextSecondary
+                            .height(160.dp),
+                        shape = RoundedCornerShape(18.dp),
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.surfaceContainerLow
                         )
+                    ) {
+                        Box(
+                            modifier = Modifier.fillMaxSize(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = if (state.searchQuery.isNotBlank())
+                                    "No applications match \"${state.searchQuery}\""
+                                else "No network usage recorded for this period",
+                                style = MaterialTheme.typography.bodyLarge,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
                     }
                 }
             } else {

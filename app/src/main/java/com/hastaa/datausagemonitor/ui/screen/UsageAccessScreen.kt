@@ -1,7 +1,6 @@
 package com.hastaa.datausagemonitor.ui.screen
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -13,13 +12,13 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.CheckCircle
 import androidx.compose.material.icons.rounded.Security
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -27,16 +26,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import com.hastaa.datausagemonitor.ui.theme.CyanNeon
-import com.hastaa.datausagemonitor.ui.theme.EmeraldNeon
-import com.hastaa.datausagemonitor.ui.theme.SurfaceBorderDark
-import com.hastaa.datausagemonitor.ui.theme.TextSecondary
 import com.hastaa.datausagemonitor.util.PermissionHelper
 
 @Composable
@@ -49,7 +42,7 @@ fun UsageAccessScreen(
     Box(
         modifier = modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
+            .background(MaterialTheme.colorScheme.surface)
             .padding(24.dp),
         contentAlignment = Alignment.Center
     ) {
@@ -58,24 +51,19 @@ fun UsageAccessScreen(
             verticalArrangement = Arrangement.Center,
             modifier = Modifier.fillMaxWidth()
         ) {
-            // Shield Icon with Glowing Aura
+            // Shield Icon with M3 Expressive Container
             Box(
                 modifier = Modifier
-                    .size(100.dp)
-                    .clip(CircleShape)
-                    .background(
-                        Brush.radialGradient(
-                            listOf(CyanNeon.copy(alpha = 0.25f), CyanNeon.copy(alpha = 0.05f))
-                        )
-                    )
-                    .border(2.dp, CyanNeon.copy(alpha = 0.4f), CircleShape),
+                    .size(96.dp)
+                    .clip(RoundedCornerShape(28.dp))
+                    .background(MaterialTheme.colorScheme.primaryContainer),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
                     imageVector = Icons.Rounded.Security,
                     contentDescription = null,
-                    tint = CyanNeon,
-                    modifier = Modifier.size(52.dp)
+                    tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                    modifier = Modifier.size(48.dp)
                 )
             }
 
@@ -85,7 +73,7 @@ fun UsageAccessScreen(
                 text = "Usage Access Required",
                 style = MaterialTheme.typography.headlineLarge,
                 fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onBackground,
+                color = MaterialTheme.colorScheme.onSurface,
                 textAlign = TextAlign.Center
             )
 
@@ -94,7 +82,7 @@ fun UsageAccessScreen(
             Text(
                 text = "To monitor network consumption and display per-application statistics, Data Usage Monitor requires Usage Access from Android Settings.",
                 style = MaterialTheme.typography.bodyLarge,
-                color = TextSecondary,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.padding(horizontal = 8.dp)
             )
@@ -102,15 +90,17 @@ fun UsageAccessScreen(
             Spacer(modifier = Modifier.height(28.dp))
 
             // Privacy Points Card
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(20.dp))
-                    .background(MaterialTheme.colorScheme.surfaceVariant)
-                    .border(1.dp, SurfaceBorderDark, RoundedCornerShape(20.dp))
-                    .padding(20.dp)
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(20.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceContainerLow
+                )
             ) {
-                Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
+                Column(
+                    modifier = Modifier.padding(20.dp),
+                    verticalArrangement = Arrangement.spacedBy(14.dp)
+                ) {
                     FeatureBullet(text = "100% Private: Processed entirely on-device")
                     FeatureBullet(text = "Zero Internet Permission: Nothing ever leaves your phone")
                     FeatureBullet(text = "Accurate breakdown for Mobile Data & Wi-Fi")
@@ -123,10 +113,6 @@ fun UsageAccessScreen(
                 onClick = {
                     PermissionHelper.openUsageAccessSettings(context)
                 },
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = CyanNeon,
-                    contentColor = MaterialTheme.colorScheme.background
-                ),
                 shape = RoundedCornerShape(16.dp),
                 modifier = Modifier
                     .fillMaxWidth()
@@ -148,7 +134,7 @@ private fun FeatureBullet(text: String) {
         Icon(
             imageVector = Icons.Rounded.CheckCircle,
             contentDescription = null,
-            tint = EmeraldNeon,
+            tint = MaterialTheme.colorScheme.primary,
             modifier = Modifier.size(20.dp)
         )
         Spacer(modifier = Modifier.width(12.dp))

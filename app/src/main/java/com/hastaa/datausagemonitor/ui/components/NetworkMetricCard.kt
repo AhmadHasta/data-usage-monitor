@@ -1,7 +1,6 @@
 package com.hastaa.datausagemonitor.ui.components
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -17,6 +16,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.SignalCellularAlt
 import androidx.compose.material.icons.rounded.Wifi
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -29,10 +30,6 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.hastaa.datausagemonitor.ui.theme.CyanNeon
-import com.hastaa.datausagemonitor.ui.theme.SurfaceBorderDark
-import com.hastaa.datausagemonitor.ui.theme.TextSecondary
-import com.hastaa.datausagemonitor.ui.theme.VioletNeon
 import com.hastaa.datausagemonitor.util.ByteFormatter
 
 @Composable
@@ -49,14 +46,18 @@ fun NetworkMetricsRow(
             title = "Mobile Data",
             bytes = mobileBytes,
             icon = Icons.Rounded.SignalCellularAlt,
-            accentColor = CyanNeon,
+            iconContainerColor = MaterialTheme.colorScheme.primaryContainer,
+            iconColor = MaterialTheme.colorScheme.onPrimaryContainer,
+            accentColor = MaterialTheme.colorScheme.primary,
             modifier = Modifier.weight(1f)
         )
         NetworkMetricCard(
             title = "Wi-Fi Network",
             bytes = wifiBytes,
             icon = Icons.Rounded.Wifi,
-            accentColor = VioletNeon,
+            iconContainerColor = MaterialTheme.colorScheme.tertiaryContainer,
+            iconColor = MaterialTheme.colorScheme.onTertiaryContainer,
+            accentColor = MaterialTheme.colorScheme.tertiary,
             modifier = Modifier.weight(1f)
         )
     }
@@ -67,19 +68,23 @@ fun NetworkMetricCard(
     title: String,
     bytes: Long,
     icon: ImageVector,
+    iconContainerColor: Color,
+    iconColor: Color,
     accentColor: Color,
     modifier: Modifier = Modifier
 ) {
     val (value, unit) = ByteFormatter.formatBytesParts(bytes)
 
-    Box(
-        modifier = modifier
-            .clip(RoundedCornerShape(20.dp))
-            .background(MaterialTheme.colorScheme.surfaceVariant)
-            .border(1.dp, SurfaceBorderDark, RoundedCornerShape(20.dp))
-            .padding(16.dp)
+    Card(
+        modifier = modifier,
+        shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainerLow
+        )
     ) {
-        Column {
+        Column(
+            modifier = Modifier.padding(18.dp)
+        ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -87,13 +92,13 @@ fun NetworkMetricCard(
                     modifier = Modifier
                         .size(36.dp)
                         .clip(CircleShape)
-                        .background(accentColor.copy(alpha = 0.15f)),
+                        .background(iconContainerColor),
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
                         imageVector = icon,
                         contentDescription = null,
-                        tint = accentColor,
+                        tint = iconColor,
                         modifier = Modifier.size(20.dp)
                     )
                 }
@@ -111,7 +116,7 @@ fun NetworkMetricCard(
             Row(verticalAlignment = Alignment.Bottom) {
                 Text(
                     text = value,
-                    style = MaterialTheme.typography.headlineLarge.copy(fontSize = 24.sp),
+                    style = MaterialTheme.typography.headlineMedium,
                     color = MaterialTheme.colorScheme.onSurface,
                     fontWeight = FontWeight.Bold
                 )

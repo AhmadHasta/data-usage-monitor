@@ -1,5 +1,8 @@
 .PHONY: help build-release release build-debug debug bundle-release clean install-release install-debug
 
+export JAVA_HOME ?= /usr/local/opt/openjdk@17/libexec/openjdk.jdk/Contents/Home
+export ANDROID_HOME ?= /usr/local/Caskroom/android-platform-tools/37.0.1
+
 GRADLEW = ./gradlew
 RELEASE_APK = app/build/outputs/apk/release/app-release.apk
 DEBUG_APK = app/build/outputs/apk/debug/app-debug.apk
