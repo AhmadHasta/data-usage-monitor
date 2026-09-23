@@ -323,7 +323,7 @@ fun DashboardScreen(
             } else {
                 items(
                     items = state.filteredApps,
-                    key = { it.uid }
+                    key = { "${it.uid}_${it.packageName}" }
                 ) { app ->
                     AppUsageItem(
                         app = app,

@@ -1,9 +1,5 @@
 package com.hastaa.datausagemonitor.ui.components
 
-import android.graphics.Bitmap
-import android.graphics.Canvas
-import android.graphics.drawable.BitmapDrawable
-import android.graphics.drawable.Drawable
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
@@ -52,12 +48,12 @@ fun AppUsageItem(
 
     val animatedRatio by animateFloatAsState(
         targetValue = relativeRatio,
-        animationSpec = tween(500),
+        animationSpec = tween(400),
         label = "appProgress"
     )
 
-    val iconBitmap = remember(app.icon) {
-        app.icon?.let { drawableToBitmap(it) }
+    val iconImageBitmap = remember(app.iconBitmap) {
+        app.iconBitmap?.asImageBitmap()
     }
 
     Card(
@@ -75,9 +71,9 @@ fun AppUsageItem(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 // App Icon
-                if (iconBitmap != null) {
+                if (iconImageBitmap != null) {
                     Image(
-                        bitmap = iconBitmap.asImageBitmap(),
+                        bitmap = iconImageBitmap,
                         contentDescription = app.appName,
                         modifier = Modifier
                             .size(46.dp)
@@ -127,7 +123,9 @@ fun AppUsageItem(
                 Spacer(modifier = Modifier.width(10.dp))
 
                 // Total Usage
-                val (valStr, unitStr) = ByteFormatter.formatBytesParts(app.totalBytes)
+                val (valStr, unitStr) = remember(app.totalBytes) {
+                    ByteFormatter.formatBytesParts(app.totalBytes)
+                }
                 Column(
                     horizontalAlignment = Alignment.End
                 ) {
@@ -165,34 +163,27 @@ fun AppUsageItem(
             Spacer(modifier = Modifier.height(10.dp))
 
             // Sub-breakdown (Mobile / Wi-Fi)
+            val mobileStr = remember(app.mobileBytes) {
+                "Mobile: ${ByteFormatter.formatBytes(app.mobileBytes)}"
+            }
+            val wifiStr = remember(app.wifiBytes) {
+                "Wi-Fi: ${ByteFormatter.formatBytes(app.wifiBytes)}"
+            }
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(
-                    text = "Mobile: ${ByteFormatter.formatBytes(app.mobileBytes)}",
+                    text = mobileStr,
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 Text(
-                    text = "Wi-Fi: ${ByteFormatter.formatBytes(app.wifiBytes)}",
+                    text = wifiStr,
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
         }
     }
-}
-
-private fun drawableToBitmap(drawable: Drawable): Bitmap {
-    if (drawable is BitmapDrawable && drawable.bitmap != null) {
-        return drawable.bitmap
-    }
-    val width = if (drawable.intrinsicWidth > 0) drawable.intrinsicWidth else 96
-    val height = if (drawable.intrinsicHeight > 0) drawable.intrinsicHeight else 96
-    val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
-    val canvas = Canvas(bitmap)
-    drawable.setBounds(0, 0, canvas.width, canvas.height)
-    drawable.draw(canvas)
-    return bitmap
 }
