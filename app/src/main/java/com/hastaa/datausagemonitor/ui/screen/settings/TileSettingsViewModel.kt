@@ -1,4 +1,4 @@
-package com.hastaa.datausagemonitor.ui.screen
+package com.hastaa.datausagemonitor.ui.screen.settings
 
 import android.app.Application
 import android.content.ComponentName
@@ -7,12 +7,12 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.hastaa.datausagemonitor.data.local.AppTheme
 import com.hastaa.datausagemonitor.data.local.ThemePreferences
-import com.hastaa.datausagemonitor.data.local.TileConfig
-import com.hastaa.datausagemonitor.data.local.TileContentStyle
-import com.hastaa.datausagemonitor.data.local.TileIconChoice
 import com.hastaa.datausagemonitor.data.local.TilePreferences
-import com.hastaa.datausagemonitor.data.local.TileTextLayout
 import com.hastaa.datausagemonitor.data.repository.NetworkUsageRepository
+import com.hastaa.datausagemonitor.domain.model.TileConfig
+import com.hastaa.datausagemonitor.domain.model.TileContentStyle
+import com.hastaa.datausagemonitor.domain.model.TileIconChoice
+import com.hastaa.datausagemonitor.domain.model.TileTextLayout
 import com.hastaa.datausagemonitor.domain.model.UsagePeriod
 import com.hastaa.datausagemonitor.tile.DataUsageTileService
 import com.hastaa.datausagemonitor.util.ActiveNetworkType
@@ -211,6 +211,6 @@ class TileSettingsViewModel(application: Application) : AndroidViewModel(applica
         val app = getApplication<Application>()
         try {
             TileService.requestListeningState(app, ComponentName(app, DataUsageTileService::class.java))
-        } catch (ignored: Exception) {}
+        } catch (_: Exception) {}
     }
 }

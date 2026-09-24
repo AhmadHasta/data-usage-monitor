@@ -16,10 +16,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import com.hastaa.datausagemonitor.data.local.AppTheme
 import com.hastaa.datausagemonitor.data.local.ThemePreferences
-import com.hastaa.datausagemonitor.ui.dashboard.DashboardViewModel
-import com.hastaa.datausagemonitor.ui.screen.DashboardScreen
-import com.hastaa.datausagemonitor.ui.screen.TileSettingsScreen
-import com.hastaa.datausagemonitor.ui.screen.UsageAccessScreen
+import com.hastaa.datausagemonitor.ui.screen.dashboard.DashboardScreen
+import com.hastaa.datausagemonitor.ui.screen.dashboard.DashboardViewModel
+import com.hastaa.datausagemonitor.ui.screen.settings.TileSettingsScreen
+import com.hastaa.datausagemonitor.ui.screen.usageaccess.UsageAccessScreen
 import com.hastaa.datausagemonitor.ui.theme.DataUsageMonitorTheme
 
 enum class AppScreen {
@@ -48,7 +48,8 @@ class MainActivity : ComponentActivity() {
                         UsageAccessScreen(
                             onPermissionGranted = {
                                 viewModel.checkPermissionAndLoad()
-                            }
+                            },
+                            appTheme = appTheme
                         )
                     } else {
                         when (currentScreen) {

@@ -10,7 +10,9 @@ import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
@@ -160,6 +162,8 @@ val M3ExpressiveDarkColorScheme = darkColorScheme(
     surfaceContainerHighest = md_theme_dark_surfaceContainerHighest
 )
 
+val LocalAppTheme = staticCompositionLocalOf { AppTheme.CYBER_NEON }
+
 @Composable
 fun DataUsageMonitorTheme(
     appTheme: AppTheme = AppTheme.CYBER_NEON,
@@ -193,10 +197,12 @@ fun DataUsageMonitorTheme(
         }
     }
 
-    MaterialTheme(
-        colorScheme = colorScheme,
-        typography = Typography,
-        shapes = Shapes,
-        content = content
-    )
+    CompositionLocalProvider(LocalAppTheme provides appTheme) {
+        MaterialTheme(
+            colorScheme = colorScheme,
+            typography = Typography,
+            shapes = Shapes,
+            content = content
+        )
+    }
 }
