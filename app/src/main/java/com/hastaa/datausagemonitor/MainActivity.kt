@@ -36,8 +36,10 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
+        val initialTheme = themePreferences.getInitialTheme()
+
         setContent {
-            val appTheme by themePreferences.appThemeFlow.collectAsState(initial = AppTheme.CYBER_NEON)
+            val appTheme by themePreferences.appThemeFlow.collectAsState(initial = initialTheme)
 
             DataUsageMonitorTheme(appTheme = appTheme) {
                 Surface(modifier = Modifier.fillMaxSize()) {

@@ -38,7 +38,7 @@ class TileSettingsViewModel(application: Application) : AndroidViewModel(applica
     private val themePrefs = ThemePreferences(application)
     private val repository = NetworkUsageRepository(application)
 
-    private val _uiState = MutableStateFlow(TileSettingsUiState())
+    private val _uiState = MutableStateFlow(TileSettingsUiState(appTheme = themePrefs.getInitialTheme()))
     val uiState: StateFlow<TileSettingsUiState> = _uiState.asStateFlow()
 
     private var saveJob: Job? = null
