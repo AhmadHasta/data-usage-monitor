@@ -11,8 +11,9 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import com.hastaa.datausagemonitor.ui.dashboard.DashboardViewModel
-import com.hastaa.datausagemonitor.ui.screen.DashboardScreen
+import com.hastaa.datausagemonitor.ui.navigation.MainAppNavigation
 import com.hastaa.datausagemonitor.ui.screen.UsageAccessScreen
+import com.hastaa.datausagemonitor.ui.theme.DarkBackground
 import com.hastaa.datausagemonitor.ui.theme.DataUsageMonitorTheme
 
 class MainActivity : ComponentActivity() {
@@ -25,23 +26,25 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             DataUsageMonitorTheme {
-                Surface(modifier = Modifier.fillMaxSize()) {
+                Surface(
+                    modifier = Modifier.fillMaxSize(),
+                    color = DarkBackground
+                ) {
                     val state by viewModel.uiState.collectAsState()
 
-                    if (!state.hasUsageAccess) {
+                    if (!state.hasUsageAccess && !state.isDemoMode) {
                         UsageAccessScreen(
                             onPermissionGranted = {
                                 viewModel.checkPermissionAndLoad()
+                            },
+                            onSkipToDemo = {
+                                viewModel.setDemoMode(true)
                             }
                         )
                     } else {
-                        DashboardScreen(
-                            state = state,
-                            onPeriodSelected = viewModel::setPeriod,
-                            onSearchQueryChanged = viewModel::setSearchQuery,
-                            onNetworkFilterChanged = viewModel::setNetworkFilter,
-                            onDismissTileBanner = viewModel::dismissTileBanner,
-                            onRefresh = viewModel::refresh
+                        MainAppNavigation(
+                            viewModel = viewModel,
+                            state = state
                         )
                     }
                 }

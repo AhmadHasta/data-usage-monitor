@@ -23,8 +23,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.hastaa.datausagemonitor.domain.model.UsagePeriod
-import com.hastaa.datausagemonitor.ui.theme.CyanNeon
-import com.hastaa.datausagemonitor.ui.theme.SurfaceBorderDark
+import com.hastaa.datausagemonitor.ui.theme.AccentPrimary
+import com.hastaa.datausagemonitor.ui.theme.DarkSurfaceBorder
+import com.hastaa.datausagemonitor.ui.theme.DarkSurfaceElevated
 import com.hastaa.datausagemonitor.ui.theme.TextPrimary
 import com.hastaa.datausagemonitor.ui.theme.TextSecondary
 
@@ -38,8 +39,8 @@ fun PeriodSelector(
         modifier = modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(16.dp))
-            .background(MaterialTheme.colorScheme.surfaceVariant)
-            .border(1.dp, SurfaceBorderDark, RoundedCornerShape(16.dp))
+            .background(DarkSurfaceElevated)
+            .border(1.dp, DarkSurfaceBorder, RoundedCornerShape(16.dp))
             .padding(4.dp)
     ) {
         Row(
@@ -53,7 +54,7 @@ fun PeriodSelector(
                     label = "tabBackground"
                 )
                 val textColor by animateColorAsState(
-                    targetValue = if (isSelected) CyanNeon else TextSecondary,
+                    targetValue = if (isSelected) AccentPrimary else TextSecondary,
                     animationSpec = tween(250),
                     label = "tabText"
                 )

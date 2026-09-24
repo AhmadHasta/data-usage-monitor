@@ -1,5 +1,6 @@
 package com.hastaa.datausagemonitor.ui.dashboard
 
+import com.hastaa.datausagemonitor.data.DummyData
 import com.hastaa.datausagemonitor.domain.model.AppDataUsage
 import com.hastaa.datausagemonitor.domain.model.UsagePeriod
 
@@ -10,7 +11,7 @@ enum class NetworkFilter(val label: String) {
 }
 
 data class DashboardUiState(
-    val isLoading: Boolean = true,
+    val isLoading: Boolean = false,
     val isRefreshing: Boolean = false,
     val hasUsageAccess: Boolean = false,
     val period: UsagePeriod = UsagePeriod.TODAY,
@@ -20,14 +21,25 @@ data class DashboardUiState(
     val searchQuery: String = "",
     val networkFilter: NetworkFilter = NetworkFilter.ALL,
     val showTileBanner: Boolean = false,
+    val isDemoMode: Boolean = false,
     val error: String? = null
 ) {
+    // Determine active mobile/wifi bytes (Demo mode fallback or real data)
+    val displayMobileBytes: Long
+        get() = if (isDemoMode) DummyData.mobileBytes else mobileBytes
+
+    val displayWifiBytes: Long
+        get() = if (isDemoMode) DummyData.wifiBytes else wifiBytes
+
     val totalBytes: Long
-        get() = mobileBytes + wifiBytes
+        get() = displayMobileBytes + displayWifiBytes
+
+    val activeApps: List<AppDataUsage>
+        get() = if (isDemoMode) DummyData.apps else apps
 
     val filteredApps: List<AppDataUsage>
         get() {
-            return apps
+            return activeApps
                 .filter { app ->
                     val matchesQuery = searchQuery.isBlank() ||
                             app.appName.contains(searchQuery, ignoreCase = true) ||

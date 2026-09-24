@@ -32,24 +32,28 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import com.hastaa.datausagemonitor.ui.theme.CyanNeon
-import com.hastaa.datausagemonitor.ui.theme.EmeraldNeon
-import com.hastaa.datausagemonitor.ui.theme.SurfaceBorderDark
+import com.hastaa.datausagemonitor.ui.components.GlassCard
+import com.hastaa.datausagemonitor.ui.theme.AccentPrimary
+import com.hastaa.datausagemonitor.ui.theme.AccentSuccess
+import com.hastaa.datausagemonitor.ui.theme.DarkBackground
+import com.hastaa.datausagemonitor.ui.theme.DarkSurfaceBorder
+import com.hastaa.datausagemonitor.ui.theme.DarkSurfaceElevated
+import com.hastaa.datausagemonitor.ui.theme.TextPrimary
 import com.hastaa.datausagemonitor.ui.theme.TextSecondary
 import com.hastaa.datausagemonitor.util.PermissionHelper
 
 @Composable
 fun UsageAccessScreen(
     onPermissionGranted: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onSkipToDemo: (() -> Unit)? = null
 ) {
     val context = LocalContext.current
 
     Box(
         modifier = modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
+            .background(DarkBackground)
             .padding(24.dp),
         contentAlignment = Alignment.Center
     ) {
@@ -61,21 +65,21 @@ fun UsageAccessScreen(
             // Shield Icon with Glowing Aura
             Box(
                 modifier = Modifier
-                    .size(100.dp)
+                    .size(96.dp)
                     .clip(CircleShape)
                     .background(
                         Brush.radialGradient(
-                            listOf(CyanNeon.copy(alpha = 0.25f), CyanNeon.copy(alpha = 0.05f))
+                            listOf(AccentPrimary.copy(alpha = 0.25f), AccentPrimary.copy(alpha = 0.05f))
                         )
                     )
-                    .border(2.dp, CyanNeon.copy(alpha = 0.4f), CircleShape),
+                    .border(1.5.dp, AccentPrimary.copy(alpha = 0.4f), CircleShape),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
                     imageVector = Icons.Rounded.Security,
                     contentDescription = null,
-                    tint = CyanNeon,
-                    modifier = Modifier.size(52.dp)
+                    tint = AccentPrimary,
+                    modifier = Modifier.size(48.dp)
                 )
             }
 
@@ -85,14 +89,14 @@ fun UsageAccessScreen(
                 text = "Usage Access Required",
                 style = MaterialTheme.typography.headlineLarge,
                 fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onBackground,
+                color = TextPrimary,
                 textAlign = TextAlign.Center
             )
 
             Spacer(modifier = Modifier.height(12.dp))
 
             Text(
-                text = "To monitor network consumption and display per-application statistics, Data Usage Monitor requires Usage Access from Android Settings.",
+                text = "To monitor network consumption and display per-application statistics, DataPulse requires Usage Access from Android Settings.",
                 style = MaterialTheme.typography.bodyLarge,
                 color = TextSecondary,
                 textAlign = TextAlign.Center,
@@ -102,41 +106,63 @@ fun UsageAccessScreen(
             Spacer(modifier = Modifier.height(28.dp))
 
             // Privacy Points Card
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(20.dp))
-                    .background(MaterialTheme.colorScheme.surfaceVariant)
-                    .border(1.dp, SurfaceBorderDark, RoundedCornerShape(20.dp))
-                    .padding(20.dp)
+            GlassCard(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(20.dp)
             ) {
-                Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(20.dp),
+                    verticalArrangement = Arrangement.spacedBy(14.dp)
+                ) {
                     FeatureBullet(text = "100% Private: Processed entirely on-device")
                     FeatureBullet(text = "Zero Internet Permission: Nothing ever leaves your phone")
                     FeatureBullet(text = "Accurate breakdown for Mobile Data & Wi-Fi")
                 }
             }
 
-            Spacer(modifier = Modifier.height(36.dp))
+            Spacer(modifier = Modifier.height(32.dp))
 
             Button(
                 onClick = {
                     PermissionHelper.openUsageAccessSettings(context)
                 },
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = CyanNeon,
-                    contentColor = MaterialTheme.colorScheme.background
+                    containerColor = AccentPrimary,
+                    contentColor = DarkBackground
                 ),
                 shape = RoundedCornerShape(16.dp),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(56.dp)
+                    .height(54.dp)
             ) {
                 Text(
                     text = "Grant Usage Access in Settings",
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold
                 )
+            }
+
+            if (onSkipToDemo != null) {
+                Spacer(modifier = Modifier.height(12.dp))
+                Button(
+                    onClick = onSkipToDemo,
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = DarkSurfaceElevated,
+                        contentColor = TextSecondary
+                    ),
+                    shape = RoundedCornerShape(16.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(48.dp)
+                ) {
+                    Text(
+                        text = "Explore in Demo Mode",
+                        style = MaterialTheme.typography.bodyLarge,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                }
             }
         }
     }
@@ -148,14 +174,14 @@ private fun FeatureBullet(text: String) {
         Icon(
             imageVector = Icons.Rounded.CheckCircle,
             contentDescription = null,
-            tint = EmeraldNeon,
+            tint = AccentSuccess,
             modifier = Modifier.size(20.dp)
         )
         Spacer(modifier = Modifier.width(12.dp))
         Text(
             text = text,
             style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurface
+            color = TextPrimary
         )
     }
 }

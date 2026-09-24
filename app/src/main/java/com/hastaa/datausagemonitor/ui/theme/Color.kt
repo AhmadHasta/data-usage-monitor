@@ -2,32 +2,38 @@ package com.hastaa.datausagemonitor.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-// Obsidian & Neon Dark Theme Palette
-val BackgroundDark = Color(0xFF0A0E17)
-val SurfaceDark = Color(0xFF121826)
-val SurfaceVariantDark = Color(0xFF1A2234)
-val SurfaceBorderDark = Color(0xFF26324A)
-val SurfaceSubtle = Color(0xFF0F1522)
+// DataPulse Core Dark Color System
+val DarkBackground = Color(0xFF080B14)
+val DarkSurface = Color(0xFF111625)
+val DarkSurfaceElevated = Color(0xFF181F33)
+val DarkSurfaceBorder = Color(0xFF1E2638)
+val DarkSurfaceGlass = Color(0xD9111625) // ~85% opacity for glass effect
 
-// Vibrant Neon Accents
-val CyanNeon = Color(0xFF00E5FF)
-val CyanNeonSubtle = Color(0x2000E5FF)
-val VioletNeon = Color(0xFFA78BFA)
-val VioletNeonSubtle = Color(0x20A78BFA)
-val EmeraldNeon = Color(0xFF10B981)
-val EmeraldNeonSubtle = Color(0x2010B981)
-val AmberGlow = Color(0xFFF59E0B)
-val AmberGlowSubtle = Color(0x20F59E0B)
+// Accent Colors
+val AccentPrimary = Color(0xFF5B8CFF)     // Electric Blue
+val AccentPrimarySubtle = Color(0x265B8CFF)
+val AccentSecondary = Color(0xFF9B6CFF)   // Vibrant Purple
+val AccentSecondarySubtle = Color(0x269B6CFF)
+val AccentSuccess = Color(0xFF4ADE80)     // Emerald Green
+val AccentSuccessSubtle = Color(0x264ADE80)
+val AccentWarning = Color(0xFFFACC15)     // Amber / Yellow
+val AccentWarningSubtle = Color(0x26FACC15)
+val AccentError = Color(0xFFFB7185)       // Coral Red
+val AccentErrorSubtle = Color(0x26FB7185)
 
-// Typography & Contrast
-val TextPrimary = Color(0xFFF8FAFC)
-val TextSecondary = Color(0xFF94A3B8)
-val TextTertiary = Color(0xFF64748B)
+// Typography & Content
+val TextPrimary = Color(0xFFFFFFFF)
+val TextSecondary = Color(0xFF9CA3AF)
+val TextTertiary = Color(0xFF6B7280)
 
-// Light Palette Fallbacks
-val BackgroundLight = Color(0xFFF8FAFC)
-val SurfaceLight = Color(0xFFFFFFFF)
-val SurfaceVariantLight = Color(0xFFF1F5F9)
-val SurfaceBorderLight = Color(0xFFE2E8F0)
-val TextPrimaryLight = Color(0xFF0F172A)
-val TextSecondaryLight = Color(0xFF475569)
+// Glass & Shadow Accents
+val GlassHighlight = Color(0x0FFFFFFF)
+val GlassBorderSubtle = Color(0x1A5B8CFF)
+
+// Fallbacks for Light Theme (kept clean and modern)
+val LightBackground = Color(0xFFF6F8FC)
+val LightSurface = Color(0xFFFFFFFF)
+val LightSurfaceElevated = Color(0xFFF0F3F9)
+val LightSurfaceBorder = Color(0xFFE2E8F0)
+val LightTextPrimary = Color(0xFF0F172A)
+val LightTextSecondary = Color(0xFF64748B)
