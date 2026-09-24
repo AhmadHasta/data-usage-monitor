@@ -112,4 +112,22 @@ data class TileConfig(
     val progressRingStrokeDp: Int = 5,
     val iconOnlySizeDp: Int = 38,
     val iconStrokeWidthDp: Int = 3
-)
+) {
+    val hasIcon: Boolean
+        get() = when (contentStyle) {
+            TileContentStyle.METRIC_WITH_ICON -> metricDisplayMode != MetricDisplayMode.TEXT_ONLY
+            TileContentStyle.PROGRESS_RING -> false
+            TileContentStyle.PROGRESS_WITH_ICON -> true
+            TileContentStyle.ICON_ONLY -> true
+        }
+
+    val hasUsageData: Boolean
+        get() = when (contentStyle) {
+            TileContentStyle.PROGRESS_RING,
+            TileContentStyle.PROGRESS_WITH_ICON -> true
+            TileContentStyle.METRIC_WITH_ICON -> {
+                !(metricDisplayMode == MetricDisplayMode.ICON_ONLY && textLayout == TileTextLayout.NETWORK_ONLY)
+            }
+            TileContentStyle.ICON_ONLY -> textLayout != TileTextLayout.NETWORK_ONLY
+        }
+}

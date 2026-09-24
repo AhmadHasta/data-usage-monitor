@@ -179,25 +179,36 @@ fun TileSettingsScreen(
                 }
             }
 
-            item(key = "section_icon_choice") {
-                TileIconChoiceSection(
-                    selectedChoice = config.iconChoice,
-                    onSelectChoice = { viewModel.setIconChoice(it) }
-                )
+            if (config.hasIcon) {
+                item(key = "section_icon_choice") {
+                    TileIconChoiceSection(
+                        selectedChoice = config.iconChoice,
+                        onSelectChoice = { viewModel.setIconChoice(it) },
+                        modifier = Modifier.animateItem()
+                    )
+                }
             }
 
-            item(key = "section_period") {
-                TilePeriodSection(
-                    selectedPeriod = config.period,
-                    onSelectPeriod = { viewModel.setPeriod(it) }
-                )
+            if (config.hasUsageData) {
+                item(key = "section_period") {
+                    TilePeriodSection(
+                        selectedPeriod = config.period,
+                        onSelectPeriod = { viewModel.setPeriod(it) },
+                        modifier = Modifier.animateItem()
+                    )
+                }
             }
 
-            item(key = "section_quota_limit") {
-                TileQuotaSection(
-                    config = config,
-                    onQuotaLimitChange = { viewModel.setQuotaLimit(it) }
-                )
+            val isQuotaVisible = config.contentStyle == TileContentStyle.PROGRESS_RING ||
+                    config.contentStyle == TileContentStyle.PROGRESS_WITH_ICON
+            if (isQuotaVisible) {
+                item(key = "section_quota_limit") {
+                    TileQuotaSection(
+                        config = config,
+                        onQuotaLimitChange = { viewModel.setQuotaLimit(it) },
+                        modifier = Modifier.animateItem()
+                    )
+                }
             }
 
             item(key = "bottom_space") {
