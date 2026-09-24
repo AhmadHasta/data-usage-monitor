@@ -115,12 +115,19 @@ fun TileSettingsScreen(
                     icon = Icons.Rounded.Tune
                 )
                 Spacer(modifier = Modifier.height(10.dp))
+                val visibleStyles = listOf(
+                    TileContentStyle.METRIC_WITH_ICON,
+                    TileContentStyle.PROGRESS_RING,
+                    TileContentStyle.PROGRESS_WITH_ICON
+                )
                 Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                    TileContentStyle.values().forEach { style ->
+                    visibleStyles.forEach { style ->
                         ContentStyleChoiceCard(
                             style = style,
                             isSelected = config.contentStyle == style,
-                            onSelect = { viewModel.setContentStyle(style) }
+                            onSelect = { viewModel.setContentStyle(style) },
+                            selectedMetricMode = config.metricDisplayMode,
+                            onSelectMetricMode = { viewModel.setMetricDisplayMode(it) }
                         )
                     }
                 }

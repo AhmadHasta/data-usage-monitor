@@ -11,7 +11,7 @@ class AppThemeTest {
     fun testDefaultThemeIsCyberNeon() {
         val defaultTheme = AppTheme.CYBER_NEON
         assertEquals("cyber_neon", defaultTheme.id)
-        assertEquals("Cyber Neon (Default)", defaultTheme.label)
+        assertEquals("Cyber Neon", defaultTheme.label)
     }
 
     @Test

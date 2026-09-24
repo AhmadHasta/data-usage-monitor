@@ -22,6 +22,7 @@ import java.io.IOException
 private val Context.tileDataStore: DataStore<Preferences> by preferencesDataStore(name = "tile_preferences")
 
 typealias TileContentStyle = com.hastaa.datausagemonitor.domain.model.TileContentStyle
+typealias MetricDisplayMode = com.hastaa.datausagemonitor.domain.model.MetricDisplayMode
 typealias TileIconChoice = com.hastaa.datausagemonitor.domain.model.TileIconChoice
 typealias TileTextLayout = com.hastaa.datausagemonitor.domain.model.TileTextLayout
 typealias TileConfig = com.hastaa.datausagemonitor.domain.model.TileConfig
@@ -30,6 +31,7 @@ class TilePreferences(private val context: Context) {
 
     companion object {
         private val KEY_CONTENT_STYLE = stringPreferencesKey("tile_content_style")
+        private val KEY_METRIC_DISPLAY_MODE = stringPreferencesKey("tile_metric_display_mode")
         private val KEY_ICON_CHOICE = stringPreferencesKey("tile_icon_choice")
         private val KEY_TEXT_LAYOUT = stringPreferencesKey("tile_text_layout")
         private val KEY_PERIOD = stringPreferencesKey("tile_period")
@@ -62,14 +64,25 @@ class TilePreferences(private val context: Context) {
         }
         .map { preferences ->
             val styleStr = preferences[KEY_CONTENT_STYLE]
+            val metricModeStr = preferences[KEY_METRIC_DISPLAY_MODE]
             val iconStr = preferences[KEY_ICON_CHOICE]
             val layoutStr = preferences[KEY_TEXT_LAYOUT]
             val periodStr = preferences[KEY_PERIOD]
             val limitGb = preferences[KEY_QUOTA_LIMIT_GB] ?: 10L
 
+            var resolvedStyle = runCatching { TileContentStyle.valueOf(styleStr ?: "") }
+                .getOrDefault(TileContentStyle.METRIC_WITH_ICON)
+            var resolvedMetricMode = runCatching { MetricDisplayMode.valueOf(metricModeStr ?: "") }
+                .getOrDefault(MetricDisplayMode.NUMBERS_AND_ICON)
+
+            if (resolvedStyle == TileContentStyle.ICON_ONLY) {
+                resolvedStyle = TileContentStyle.METRIC_WITH_ICON
+                resolvedMetricMode = MetricDisplayMode.ICON_ONLY
+            }
+
             TileConfig(
-                contentStyle = runCatching { TileContentStyle.valueOf(styleStr ?: "") }
-                    .getOrDefault(TileContentStyle.METRIC_WITH_ICON),
+                contentStyle = resolvedStyle,
+                metricDisplayMode = resolvedMetricMode,
                 iconChoice = runCatching { TileIconChoice.valueOf(iconStr ?: "") }
                     .getOrDefault(TileIconChoice.AUTO),
                 textLayout = runCatching { TileTextLayout.valueOf(layoutStr ?: "") }
@@ -107,6 +120,7 @@ class TilePreferences(private val context: Context) {
     suspend fun updateConfig(config: TileConfig) {
         context.tileDataStore.edit { preferences ->
             preferences[KEY_CONTENT_STYLE] = config.contentStyle.name
+            preferences[KEY_METRIC_DISPLAY_MODE] = config.metricDisplayMode.name
             preferences[KEY_ICON_CHOICE] = config.iconChoice.name
             preferences[KEY_TEXT_LAYOUT] = config.textLayout.name
             preferences[KEY_PERIOD] = config.period.name
@@ -132,6 +146,10 @@ class TilePreferences(private val context: Context) {
 
     suspend fun setContentStyle(style: TileContentStyle) {
         context.tileDataStore.edit { it[KEY_CONTENT_STYLE] = style.name }
+    }
+
+    suspend fun setMetricDisplayMode(mode: MetricDisplayMode) {
+        context.tileDataStore.edit { it[KEY_METRIC_DISPLAY_MODE] = mode.name }
     }
 
     suspend fun setIconChoice(choice: TileIconChoice) {

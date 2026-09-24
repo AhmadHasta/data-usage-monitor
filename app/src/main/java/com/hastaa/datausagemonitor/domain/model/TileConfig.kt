@@ -3,7 +3,7 @@ package com.hastaa.datausagemonitor.domain.model
 enum class TileContentStyle(val label: String, val subtitle: String) {
     METRIC_WITH_ICON(
         label = "Numbers & Icon",
-        subtitle = "Usage metric, unit (GB/MB), and network icon above"
+        subtitle = "Display usage metric, network icon, or both"
     ),
     PROGRESS_RING(
         label = "Progress Ring",
@@ -56,8 +56,24 @@ enum class TileTextLayout(val label: String, val previewFirst: String, val previ
     )
 }
 
+enum class MetricDisplayMode(val label: String, val subtitle: String) {
+    NUMBERS_AND_ICON(
+        label = "Numbers & Icon",
+        subtitle = "Usage metric, unit (GB/MB), and network icon above"
+    ),
+    TEXT_ONLY(
+        label = "Text Only",
+        subtitle = "Usage metric and unit only without icon"
+    ),
+    ICON_ONLY(
+        label = "Icon Only",
+        subtitle = "Minimalist network icon centered in tile"
+    )
+}
+
 data class TileConfig(
     val contentStyle: TileContentStyle = TileContentStyle.METRIC_WITH_ICON,
+    val metricDisplayMode: MetricDisplayMode = MetricDisplayMode.NUMBERS_AND_ICON,
     val iconChoice: TileIconChoice = TileIconChoice.AUTO,
     val textLayout: TileTextLayout = TileTextLayout.SINGLE_LINE,
     val period: UsagePeriod = UsagePeriod.TODAY,

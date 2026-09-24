@@ -25,6 +25,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.hastaa.datausagemonitor.domain.model.MetricDisplayMode
 import com.hastaa.datausagemonitor.domain.model.TileConfig
 import com.hastaa.datausagemonitor.domain.model.TileContentStyle
 import com.hastaa.datausagemonitor.ui.screen.settings.components.SectionHeader
@@ -72,8 +73,13 @@ fun TileSizingSection(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
+                    val currentStyleLabel = if (config.contentStyle == TileContentStyle.METRIC_WITH_ICON) {
+                        config.metricDisplayMode.label
+                    } else {
+                        config.contentStyle.label
+                    }
                     Text(
-                        text = "Style: ${config.contentStyle.label}",
+                        text = "Style: $currentStyleLabel",
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.primary
@@ -97,45 +103,91 @@ fun TileSizingSection(
 
                 when (config.contentStyle) {
                     TileContentStyle.METRIC_WITH_ICON -> {
-                        SeekbarSettingItem(
-                            label = "Network Icon Size",
-                            value = config.metricIconSizeDp.toFloat(),
-                            valueDisplay = "${config.metricIconSizeDp} dp",
-                            valueRange = 12f..100f,
-                            onValueChange = { onMetricIconSizeChange(it.roundToInt()) }
-                        )
+                        when (config.metricDisplayMode) {
+                            MetricDisplayMode.NUMBERS_AND_ICON -> {
+                                SeekbarSettingItem(
+                                    label = "Network Icon Size",
+                                    value = config.metricIconSizeDp.toFloat(),
+                                    valueDisplay = "${config.metricIconSizeDp} dp",
+                                    valueRange = 12f..100f,
+                                    onValueChange = { onMetricIconSizeChange(it.roundToInt()) }
+                                )
 
-                        SeekbarSettingItem(
-                            label = "Icon Line Thickness (Stroke)",
-                            value = config.iconStrokeWidthDp.toFloat(),
-                            valueDisplay = "${config.iconStrokeWidthDp} dp",
-                            valueRange = 1f..6f,
-                            onValueChange = { onIconStrokeWidthChange(it.roundToInt()) }
-                        )
+                                SeekbarSettingItem(
+                                    label = "Icon Line Thickness (Stroke)",
+                                    value = config.iconStrokeWidthDp.toFloat(),
+                                    valueDisplay = "${config.iconStrokeWidthDp} dp",
+                                    valueRange = 1f..6f,
+                                    onValueChange = { onIconStrokeWidthChange(it.roundToInt()) }
+                                )
 
-                        SeekbarSettingItem(
-                            label = "Number Text Size",
-                            value = config.metricValueTextSizeSp.toFloat(),
-                            valueDisplay = "${config.metricValueTextSizeSp} sp",
-                            valueRange = 14f..30f,
-                            onValueChange = { onMetricValueTextSizeChange(it.roundToInt()) }
-                        )
+                                SeekbarSettingItem(
+                                    label = "Number Text Size",
+                                    value = config.metricValueTextSizeSp.toFloat(),
+                                    valueDisplay = "${config.metricValueTextSizeSp} sp",
+                                    valueRange = 14f..30f,
+                                    onValueChange = { onMetricValueTextSizeChange(it.roundToInt()) }
+                                )
 
-                        SeekbarSettingItem(
-                            label = "Unit Text Size (GB/MB)",
-                            value = config.metricUnitTextSizeSp.toFloat(),
-                            valueDisplay = "${config.metricUnitTextSizeSp} sp",
-                            valueRange = 8f..18f,
-                            onValueChange = { onMetricUnitTextSizeChange(it.roundToInt()) }
-                        )
+                                SeekbarSettingItem(
+                                    label = "Unit Text Size (GB/MB)",
+                                    value = config.metricUnitTextSizeSp.toFloat(),
+                                    valueDisplay = "${config.metricUnitTextSizeSp} sp",
+                                    valueRange = 8f..18f,
+                                    onValueChange = { onMetricUnitTextSizeChange(it.roundToInt()) }
+                                )
 
-                        SeekbarSettingItem(
-                            label = "Element Spacing",
-                            value = config.metricSpacingDp.toFloat(),
-                            valueDisplay = "${config.metricSpacingDp} dp",
-                            valueRange = -2f..10f,
-                            onValueChange = { onMetricSpacingChange(it.roundToInt()) }
-                        )
+                                SeekbarSettingItem(
+                                    label = "Element Spacing",
+                                    value = config.metricSpacingDp.toFloat(),
+                                    valueDisplay = "${config.metricSpacingDp} dp",
+                                    valueRange = -2f..10f,
+                                    onValueChange = { onMetricSpacingChange(it.roundToInt()) }
+                                )
+                            }
+                            MetricDisplayMode.TEXT_ONLY -> {
+                                SeekbarSettingItem(
+                                    label = "Number Text Size",
+                                    value = config.metricValueTextSizeSp.toFloat(),
+                                    valueDisplay = "${config.metricValueTextSizeSp} sp",
+                                    valueRange = 14f..30f,
+                                    onValueChange = { onMetricValueTextSizeChange(it.roundToInt()) }
+                                )
+
+                                SeekbarSettingItem(
+                                    label = "Unit Text Size (GB/MB)",
+                                    value = config.metricUnitTextSizeSp.toFloat(),
+                                    valueDisplay = "${config.metricUnitTextSizeSp} sp",
+                                    valueRange = 8f..18f,
+                                    onValueChange = { onMetricUnitTextSizeChange(it.roundToInt()) }
+                                )
+
+                                SeekbarSettingItem(
+                                    label = "Element Spacing",
+                                    value = config.metricSpacingDp.toFloat(),
+                                    valueDisplay = "${config.metricSpacingDp} dp",
+                                    valueRange = -2f..10f,
+                                    onValueChange = { onMetricSpacingChange(it.roundToInt()) }
+                                )
+                            }
+                            MetricDisplayMode.ICON_ONLY -> {
+                                SeekbarSettingItem(
+                                    label = "Network Icon Size",
+                                    value = config.iconOnlySizeDp.toFloat(),
+                                    valueDisplay = "${config.iconOnlySizeDp} dp",
+                                    valueRange = 24f..100f,
+                                    onValueChange = { onIconOnlySizeChange(it.roundToInt()) }
+                                )
+
+                                SeekbarSettingItem(
+                                    label = "Icon Line Thickness (Stroke)",
+                                    value = config.iconStrokeWidthDp.toFloat(),
+                                    valueDisplay = "${config.iconStrokeWidthDp} dp",
+                                    valueRange = 1f..6f,
+                                    onValueChange = { onIconStrokeWidthChange(it.roundToInt()) }
+                                )
+                            }
+                        }
                     }
                     TileContentStyle.PROGRESS_RING -> {
                         SeekbarSettingItem(

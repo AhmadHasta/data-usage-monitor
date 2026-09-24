@@ -11,6 +11,7 @@ import android.graphics.drawable.Icon
 import com.hastaa.datausagemonitor.data.local.TileConfig
 import com.hastaa.datausagemonitor.data.local.TileContentStyle
 import com.hastaa.datausagemonitor.data.local.TileIconChoice
+import com.hastaa.datausagemonitor.domain.model.MetricDisplayMode
 
 /**
  * Generates dynamic Bitmaps for Quick Settings Tile icons following
@@ -52,7 +53,11 @@ object TileIconGenerator {
         }
 
         val bitmap = when (config.contentStyle) {
-            TileContentStyle.METRIC_WITH_ICON -> createUsageBitmap(value, unit, effectiveIconType, config)
+            TileContentStyle.METRIC_WITH_ICON -> when (config.metricDisplayMode) {
+                MetricDisplayMode.NUMBERS_AND_ICON -> createUsageBitmap(value, unit, effectiveIconType, config)
+                MetricDisplayMode.TEXT_ONLY -> createTextOnlyBitmap(value, unit, config)
+                MetricDisplayMode.ICON_ONLY -> createIconOnlyBitmap(effectiveIconType, config)
+            }
             TileContentStyle.PROGRESS_RING -> createProgressRingBitmap(progressRatio, config)
             TileContentStyle.PROGRESS_WITH_ICON -> createProgressWithIconBitmap(progressRatio, effectiveIconType, config)
             TileContentStyle.ICON_ONLY -> createIconOnlyBitmap(effectiveIconType, config)
@@ -138,6 +143,48 @@ object TileIconGenerator {
 
         val valueY = 70f + spacing * 1.5f
         val unitY = (valueY + unitTextSize + 4f + spacing * 1.5f).coerceAtMost(120f)
+
+        canvas.drawText(value, centerX, valueY, valuePaint)
+        canvas.drawText(unit, centerX, unitY, unitPaint)
+
+        return bitmap
+    }
+
+    fun createTextOnlyBitmap(
+        value: String,
+        unit: String,
+        config: TileConfig = TileConfig()
+    ): Bitmap {
+        val bitmap = Bitmap.createBitmap(BITMAP_SIZE, BITMAP_SIZE, Bitmap.Config.ARGB_8888)
+        val canvas = Canvas(bitmap)
+        val centerX = BITMAP_SIZE / 2f
+        val centerY = BITMAP_SIZE / 2f
+
+        val baseValueSize = when {
+            value.length <= 3 -> 46f
+            value.length == 4 -> 40f
+            else -> 34f
+        }
+        val valueTextSize = (config.metricValueTextSizeSp / 20f) * baseValueSize
+        val unitTextSize = (config.metricUnitTextSizeSp / 11f) * 24f
+        val spacing = config.metricSpacingDp.toFloat()
+
+        val valuePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            color = Color.WHITE
+            textAlign = Paint.Align.CENTER
+            textSize = valueTextSize
+            typeface = Typeface.create(Typeface.SANS_SERIF, Typeface.BOLD)
+        }
+
+        val unitPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            color = Color.WHITE
+            textAlign = Paint.Align.CENTER
+            textSize = unitTextSize
+            typeface = Typeface.create(Typeface.SANS_SERIF, Typeface.BOLD)
+        }
+
+        val valueY = centerY + (valueTextSize * 0.18f) - (unitTextSize * 0.5f)
+        val unitY = (valueY + unitTextSize + 4f + spacing).coerceAtMost(118f)
 
         canvas.drawText(value, centerX, valueY, valuePaint)
         canvas.drawText(unit, centerX, unitY, unitPaint)

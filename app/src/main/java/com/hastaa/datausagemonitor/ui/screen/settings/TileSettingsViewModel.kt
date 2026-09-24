@@ -9,6 +9,7 @@ import com.hastaa.datausagemonitor.data.local.AppTheme
 import com.hastaa.datausagemonitor.data.local.ThemePreferences
 import com.hastaa.datausagemonitor.data.local.TilePreferences
 import com.hastaa.datausagemonitor.data.repository.NetworkUsageRepository
+import com.hastaa.datausagemonitor.domain.model.MetricDisplayMode
 import com.hastaa.datausagemonitor.domain.model.TileConfig
 import com.hastaa.datausagemonitor.domain.model.TileContentStyle
 import com.hastaa.datausagemonitor.domain.model.TileIconChoice
@@ -100,6 +101,10 @@ class TileSettingsViewModel(application: Application) : AndroidViewModel(applica
         mutateConfig(debounceSave = false) { it.copy(contentStyle = style) }
     }
 
+    fun setMetricDisplayMode(mode: MetricDisplayMode) {
+        mutateConfig(debounceSave = false) { it.copy(metricDisplayMode = mode) }
+    }
+
     fun setIconChoice(choice: TileIconChoice) {
         mutateConfig(debounceSave = false) { it.copy(iconChoice = choice) }
     }
@@ -172,6 +177,7 @@ class TileSettingsViewModel(application: Application) : AndroidViewModel(applica
                     metricValueTextSizeSp = 20,
                     metricUnitTextSizeSp = 11,
                     metricSpacingDp = 2,
+                    iconOnlySizeDp = 38,
                     iconStrokeWidthDp = 3
                 )
                 TileContentStyle.PROGRESS_RING -> current.copy(
