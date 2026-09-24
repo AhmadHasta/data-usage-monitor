@@ -5,7 +5,6 @@ import android.content.ComponentName
 import android.content.Context
 import android.graphics.drawable.Icon
 import android.os.Build
-import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -39,11 +38,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.hastaa.datausagemonitor.R
 import com.hastaa.datausagemonitor.tile.DataUsageTileService
-import com.hastaa.datausagemonitor.ui.theme.AccentPrimary
-import com.hastaa.datausagemonitor.ui.theme.DarkSurfaceBorder
-import com.hastaa.datausagemonitor.ui.theme.DarkSurfaceElevated
-import com.hastaa.datausagemonitor.ui.theme.TextPrimary
+import com.hastaa.datausagemonitor.ui.theme.CyanNeon
+import com.hastaa.datausagemonitor.ui.theme.SurfaceBorderDark
 import com.hastaa.datausagemonitor.ui.theme.TextSecondary
+
+import android.widget.Toast
+import androidx.compose.ui.platform.LocalContext
 
 @Composable
 fun QuickSettingsBanner(
@@ -52,16 +52,15 @@ fun QuickSettingsBanner(
 ) {
     val context = LocalContext.current
 
-    GlassCard(
-        modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(20.dp),
-        borderColor = AccentPrimary.copy(alpha = 0.35f)
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(20.dp))
+            .background(MaterialTheme.colorScheme.surfaceVariant)
+            .border(1.dp, CyanNeon.copy(alpha = 0.3f), RoundedCornerShape(20.dp))
+            .padding(16.dp)
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(18.dp)
-        ) {
+        Column {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
@@ -70,13 +69,13 @@ fun QuickSettingsBanner(
                     modifier = Modifier
                         .size(36.dp)
                         .clip(CircleShape)
-                        .background(AccentPrimary.copy(alpha = 0.15f)),
+                        .background(CyanNeon.copy(alpha = 0.15f)),
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
                         imageVector = Icons.Rounded.Widgets,
                         contentDescription = null,
-                        tint = AccentPrimary,
+                        tint = CyanNeon,
                         modifier = Modifier.size(20.dp)
                     )
                 }
@@ -86,7 +85,7 @@ fun QuickSettingsBanner(
                         text = "Quick Settings Glance",
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
-                        color = TextPrimary
+                        color = MaterialTheme.colorScheme.onSurface
                     )
                     Text(
                         text = "Check your data consumption in one swipe without opening the app.",
@@ -121,7 +120,7 @@ fun QuickSettingsBanner(
                         onDismiss()
                     },
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = AccentPrimary,
+                        containerColor = CyanNeon,
                         contentColor = MaterialTheme.colorScheme.background
                     ),
                     shape = RoundedCornerShape(12.dp)

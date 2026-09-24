@@ -46,17 +46,14 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
         if (hasPermission) {
             loadUsageData()
         } else {
-            // If no permission granted yet, enable demo mode by default so the UI is immediately testable
-            _uiState.update { it.copy(isDemoMode = true, isLoading = false) }
+            _uiState.update { it.copy(isLoading = false) }
         }
     }
 
     fun setPeriod(period: UsagePeriod) {
         if (_uiState.value.period == period) return
         _uiState.update { it.copy(period = period) }
-        if (!_uiState.value.isDemoMode) {
-            loadUsageData()
-        }
+        loadUsageData()
     }
 
     fun setSearchQuery(query: String) {
@@ -67,17 +64,6 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
         _uiState.update { it.copy(networkFilter = filter) }
     }
 
-    fun setDemoMode(enabled: Boolean) {
-        _uiState.update { it.copy(isDemoMode = enabled) }
-        if (!enabled && _uiState.value.hasUsageAccess) {
-            loadUsageData()
-        }
-    }
-
-    fun toggleDemoMode() {
-        setDemoMode(!_uiState.value.isDemoMode)
-    }
-
     fun dismissTileBanner() {
         viewModelScope.launch {
             repository.setDismissedTilePrompt(true)
@@ -86,9 +72,6 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
     }
 
     fun refresh() {
-        if (_uiState.value.isDemoMode) {
-            return
-        }
         _uiState.update { it.copy(isRefreshing = true) }
         loadUsageData(isRefresh = true)
     }

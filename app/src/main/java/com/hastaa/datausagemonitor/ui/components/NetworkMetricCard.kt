@@ -1,6 +1,7 @@
 package com.hastaa.datausagemonitor.ui.components
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -28,71 +29,90 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.hastaa.datausagemonitor.ui.theme.AccentPrimary
-import com.hastaa.datausagemonitor.ui.theme.AccentSecondary
-import com.hastaa.datausagemonitor.ui.theme.TextPrimary
+import com.hastaa.datausagemonitor.ui.theme.CyanNeon
+import com.hastaa.datausagemonitor.ui.theme.SurfaceBorderDark
 import com.hastaa.datausagemonitor.ui.theme.TextSecondary
-import com.hastaa.datausagemonitor.ui.theme.TextTertiary
+import com.hastaa.datausagemonitor.ui.theme.VioletNeon
 import com.hastaa.datausagemonitor.util.ByteFormatter
 
-/**
- * Compact Network Stat Card (Mobile or Wi-Fi).
- */
 @Composable
-fun NetworkStatCard(
+fun NetworkMetricsRow(
+    mobileBytes: Long,
+    wifiBytes: Long,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        NetworkMetricCard(
+            title = "Mobile Data",
+            bytes = mobileBytes,
+            icon = Icons.Rounded.SignalCellularAlt,
+            accentColor = CyanNeon,
+            modifier = Modifier.weight(1f)
+        )
+        NetworkMetricCard(
+            title = "Wi-Fi Network",
+            bytes = wifiBytes,
+            icon = Icons.Rounded.Wifi,
+            accentColor = VioletNeon,
+            modifier = Modifier.weight(1f)
+        )
+    }
+}
+
+@Composable
+fun NetworkMetricCard(
     title: String,
     bytes: Long,
     icon: ImageVector,
     accentColor: Color,
-    modifier: Modifier = Modifier,
-    periodSubtext: String = "Today"
+    modifier: Modifier = Modifier
 ) {
     val (value, unit) = ByteFormatter.formatBytesParts(bytes)
 
-    GlassCard(
-        modifier = modifier,
-        shape = RoundedCornerShape(20.dp)
+    Box(
+        modifier = modifier
+            .clip(RoundedCornerShape(20.dp))
+            .background(MaterialTheme.colorScheme.surfaceVariant)
+            .border(1.dp, SurfaceBorderDark, RoundedCornerShape(20.dp))
+            .padding(16.dp)
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(18.dp)
-        ) {
-            // Icon & Title Header
+        Column {
             Row(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Box(
                     modifier = Modifier
-                        .size(32.dp)
+                        .size(36.dp)
                         .clip(CircleShape)
                         .background(accentColor.copy(alpha = 0.15f)),
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
                         imageVector = icon,
-                        contentDescription = title,
+                        contentDescription = null,
                         tint = accentColor,
-                        modifier = Modifier.size(17.dp)
+                        modifier = Modifier.size(20.dp)
                     )
                 }
-                Spacer(modifier = Modifier.width(8.dp))
+                Spacer(modifier = Modifier.width(10.dp))
                 Text(
                     text = title,
                     style = MaterialTheme.typography.titleMedium,
-                    color = TextSecondary,
+                    color = MaterialTheme.colorScheme.onSurface,
                     fontWeight = FontWeight.SemiBold
                 )
             }
 
             Spacer(modifier = Modifier.height(14.dp))
 
-            // Value + Unit
             Row(verticalAlignment = Alignment.Bottom) {
                 Text(
                     text = value,
-                    style = MaterialTheme.typography.headlineLarge.copy(fontSize = 26.sp),
-                    color = TextPrimary,
+                    style = MaterialTheme.typography.headlineLarge.copy(fontSize = 24.sp),
+                    color = MaterialTheme.colorScheme.onSurface,
                     fontWeight = FontWeight.Bold
                 )
                 Spacer(modifier = Modifier.width(4.dp))
@@ -100,52 +120,10 @@ fun NetworkStatCard(
                     text = unit,
                     style = MaterialTheme.typography.titleMedium,
                     color = accentColor,
-                    fontWeight = FontWeight.Bold,
+                    fontWeight = FontWeight.SemiBold,
                     modifier = Modifier.padding(bottom = 2.dp)
                 )
             }
-
-            Spacer(modifier = Modifier.height(4.dp))
-
-            // Subtext (e.g. "Today")
-            Text(
-                text = periodSubtext,
-                style = MaterialTheme.typography.labelSmall,
-                color = TextTertiary
-            )
         }
-    }
-}
-
-/**
- * Side-by-side row displaying Mobile and Wi-Fi cards.
- */
-@Composable
-fun NetworkStatsRow(
-    mobileBytes: Long,
-    wifiBytes: Long,
-    modifier: Modifier = Modifier,
-    periodSubtext: String = "Today"
-) {
-    Row(
-        modifier = modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(14.dp)
-    ) {
-        NetworkStatCard(
-            title = "Mobile",
-            bytes = mobileBytes,
-            icon = Icons.Rounded.SignalCellularAlt,
-            accentColor = AccentPrimary,
-            modifier = Modifier.weight(1f),
-            periodSubtext = periodSubtext
-        )
-        NetworkStatCard(
-            title = "Wi-Fi",
-            bytes = wifiBytes,
-            icon = Icons.Rounded.Wifi,
-            accentColor = AccentSecondary,
-            modifier = Modifier.weight(1f),
-            periodSubtext = periodSubtext
-        )
     }
 }

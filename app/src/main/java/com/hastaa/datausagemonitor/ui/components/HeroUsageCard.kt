@@ -3,6 +3,7 @@ package com.hastaa.datausagemonitor.ui.components
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -17,8 +18,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.DataUsage
-import androidx.compose.material.icons.rounded.SignalCellularAlt
-import androidx.compose.material.icons.rounded.Wifi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -27,29 +26,26 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.hastaa.datausagemonitor.ui.theme.AccentPrimary
-import com.hastaa.datausagemonitor.ui.theme.AccentSecondary
-import com.hastaa.datausagemonitor.ui.theme.DarkSurfaceBorder
-import com.hastaa.datausagemonitor.ui.theme.TextPrimary
+import com.hastaa.datausagemonitor.domain.model.UsagePeriod
+import com.hastaa.datausagemonitor.ui.theme.CyanNeon
+import com.hastaa.datausagemonitor.ui.theme.EmeraldNeon
+import com.hastaa.datausagemonitor.ui.theme.SurfaceBorderDark
 import com.hastaa.datausagemonitor.ui.theme.TextSecondary
-import com.hastaa.datausagemonitor.ui.theme.TextTertiary
+import com.hastaa.datausagemonitor.ui.theme.VioletNeon
 import com.hastaa.datausagemonitor.util.ByteFormatter
 
-/**
- * Today's Usage Card — The visual focal point of the Dashboard.
- * Displays large total usage value, animated distribution bar, and mobile/Wi-Fi breakdown.
- */
 @Composable
-fun UsageCard(
+fun HeroUsageCard(
     totalBytes: Long,
     mobileBytes: Long,
     wifiBytes: Long,
-    modifier: Modifier = Modifier,
-    periodLabel: String = "TODAY'S USAGE"
+    period: UsagePeriod,
+    modifier: Modifier = Modifier
 ) {
     val (value, unit) = ByteFormatter.formatBytesParts(totalBytes)
 
@@ -58,25 +54,32 @@ fun UsageCard(
 
     val animatedMobileRatio by animateFloatAsState(
         targetValue = mobileRatio,
-        animationSpec = tween(durationMillis = 600),
+        animationSpec = tween(600),
         label = "mobileRatio"
     )
     val animatedWifiRatio by animateFloatAsState(
         targetValue = wifiRatio,
-        animationSpec = tween(durationMillis = 600),
+        animationSpec = tween(600),
         label = "wifiRatio"
     )
 
-    GlassCard(
-        modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(26.dp)
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(24.dp))
+            .background(
+                brush = Brush.verticalGradient(
+                    colors = listOf(
+                        MaterialTheme.colorScheme.surfaceVariant,
+                        MaterialTheme.colorScheme.surface
+                    )
+                )
+            )
+            .border(1.dp, SurfaceBorderDark, RoundedCornerShape(24.dp))
+            .padding(22.dp)
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(24.dp)
-        ) {
-            // Header Tag
+        Column {
+            // Top badge row
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -85,60 +88,67 @@ fun UsageCard(
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Box(
                         modifier = Modifier
-                            .size(30.dp)
+                            .size(32.dp)
                             .clip(CircleShape)
-                            .background(AccentPrimary.copy(alpha = 0.15f)),
+                            .background(EmeraldNeon.copy(alpha = 0.15f)),
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
                             imageVector = Icons.Rounded.DataUsage,
                             contentDescription = null,
-                            tint = AccentPrimary,
-                            modifier = Modifier.size(17.dp)
+                            tint = EmeraldNeon,
+                            modifier = Modifier.size(18.dp)
                         )
                     }
                     Spacer(modifier = Modifier.width(10.dp))
                     Text(
-                        text = periodLabel,
+                        text = "TOTAL NETWORK USAGE",
                         style = MaterialTheme.typography.labelSmall,
                         color = TextSecondary,
                         fontWeight = FontWeight.Bold,
-                        letterSpacing = 1.3.sp
+                        letterSpacing = 1.2.sp
                     )
                 }
 
-                // Subtle Status indicator
+                // Period Pill
                 Box(
                     modifier = Modifier
-                        .size(8.dp)
-                        .clip(CircleShape)
-                        .background(AccentPrimary)
-                )
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(MaterialTheme.colorScheme.outline.copy(alpha = 0.4f))
+                        .padding(horizontal = 10.dp, vertical = 4.dp)
+                ) {
+                    Text(
+                        text = period.label,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                }
             }
 
-            Spacer(modifier = Modifier.height(20.dp))
+            Spacer(modifier = Modifier.height(18.dp))
 
-            // Big Total Usage Number
+            // Big Usage Number with Unit
             Row(
                 verticalAlignment = Alignment.Bottom
             ) {
                 Text(
                     text = value,
-                    style = MaterialTheme.typography.displayLarge.copy(fontSize = 52.sp),
+                    style = MaterialTheme.typography.displayLarge.copy(fontSize = 50.sp),
                     fontWeight = FontWeight.ExtraBold,
-                    color = TextPrimary
+                    color = MaterialTheme.colorScheme.onSurface
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
                     text = unit,
                     style = MaterialTheme.typography.headlineLarge,
-                    color = AccentPrimary,
+                    color = EmeraldNeon,
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier.padding(bottom = 6.dp)
                 )
             }
 
-            Spacer(modifier = Modifier.height(20.dp))
+            Spacer(modifier = Modifier.height(18.dp))
 
             // Split Bar (Mobile vs Wi-Fi distribution)
             Box(
@@ -146,7 +156,7 @@ fun UsageCard(
                     .fillMaxWidth()
                     .height(8.dp)
                     .clip(RoundedCornerShape(4.dp))
-                    .background(DarkSurfaceBorder.copy(alpha = 0.6f))
+                    .background(Color(0xFF202A3C))
             ) {
                 Row(modifier = Modifier.fillMaxWidth()) {
                     if (animatedMobileRatio > 0f) {
@@ -154,7 +164,7 @@ fun UsageCard(
                             modifier = Modifier
                                 .weight(animatedMobileRatio)
                                 .height(8.dp)
-                                .background(AccentPrimary)
+                                .background(CyanNeon)
                         )
                     }
                     if (animatedWifiRatio > 0f) {
@@ -162,82 +172,49 @@ fun UsageCard(
                             modifier = Modifier
                                 .weight(animatedWifiRatio)
                                 .height(8.dp)
-                                .background(AccentSecondary)
+                                .background(VioletNeon)
                         )
                     }
                 }
             }
 
-            Spacer(modifier = Modifier.height(18.dp))
+            Spacer(modifier = Modifier.height(12.dp))
 
-            // Sub-metrics Row: Mobile and Wi-Fi
+            // Ratio labels
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+                horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                // Mobile
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Box(
                         modifier = Modifier
-                            .size(36.dp)
+                            .size(8.dp)
                             .clip(CircleShape)
-                            .background(AccentPrimary.copy(alpha = 0.12f)),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            imageVector = Icons.Rounded.SignalCellularAlt,
-                            contentDescription = "Mobile Data",
-                            tint = AccentPrimary,
-                            modifier = Modifier.size(18.dp)
-                        )
-                    }
-                    Spacer(modifier = Modifier.width(10.dp))
-                    Column {
-                        Text(
-                            text = "Mobile",
-                            style = MaterialTheme.typography.labelSmall,
-                            color = TextTertiary
-                        )
-                        Text(
-                            text = ByteFormatter.formatBytes(mobileBytes),
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Bold,
-                            color = TextPrimary
-                        )
-                    }
+                            .background(CyanNeon)
+                    )
+                    Spacer(modifier = Modifier.width(6.dp))
+                    val mobilePct = (mobileRatio * 100).toInt()
+                    Text(
+                        text = "Mobile: $mobilePct%",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = TextSecondary
+                    )
                 }
 
-                // Wi-Fi
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Box(
                         modifier = Modifier
-                            .size(36.dp)
+                            .size(8.dp)
                             .clip(CircleShape)
-                            .background(AccentSecondary.copy(alpha = 0.12f)),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            imageVector = Icons.Rounded.Wifi,
-                            contentDescription = "Wi-Fi",
-                            tint = AccentSecondary,
-                            modifier = Modifier.size(18.dp)
-                        )
-                    }
-                    Spacer(modifier = Modifier.width(10.dp))
-                    Column {
-                        Text(
-                            text = "Wi-Fi",
-                            style = MaterialTheme.typography.labelSmall,
-                            color = TextTertiary
-                        )
-                        Text(
-                            text = ByteFormatter.formatBytes(wifiBytes),
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Bold,
-                            color = TextPrimary
-                        )
-                    }
+                            .background(VioletNeon)
+                    )
+                    Spacer(modifier = Modifier.width(6.dp))
+                    val wifiPct = (wifiRatio * 100).toInt()
+                    Text(
+                        text = "Wi-Fi: $wifiPct%",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = TextSecondary
+                    )
                 }
             }
         }
