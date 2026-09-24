@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Splash Screen Colors (Dark Mode) -->
+    <color name="splash_background">#0B0F17</color>
+    <color name="splash_icon_cyan">#00E5FF</color>
+    <color name="splash_icon_violet">#8B5CF6</color>
+</resources>

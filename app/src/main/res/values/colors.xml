@@ -31,4 +31,14 @@
     <color name="m3_dark_surface_container_highest">#303638</color>
     <color name="m3_dark_primary">#53D7F2</color>
     <color name="m3_dark_tertiary">#C5C3EA</color>
+
+    <!-- Splash Screen Colors (Light Mode) -->
+    <color name="splash_background">#FFFFFF</color>
+    <color name="splash_icon_cyan">#00E5FF</color>
+    <color name="splash_icon_violet">#8B5CF6</color>
+
+    <!-- Launcher Icon Colors (White Background) -->
+    <color name="launcher_background">#FFFFFF</color>
+    <color name="launcher_icon_cyan">#00E5FF</color>
+    <color name="launcher_icon_violet">#8B5CF6</color>
 </resources>

@@ -72,14 +72,14 @@ fun CyberNeonQuickSettingsBanner(
                 Spacer(modifier = Modifier.width(12.dp))
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
-                        text = "Quick Settings Glance",
+                        text = "Widgets & Quick Settings",
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onSurface
                     )
                     Spacer(modifier = Modifier.height(2.dp))
                     Text(
-                        text = "Check your data consumption in one swipe without opening the app.",
+                        text = "Track data usage from your Home Screen Widget or Quick Settings Tile.",
                         style = MaterialTheme.typography.bodyMedium.copy(fontSize = 12.sp),
                         color = TextSecondary
                     )
@@ -131,7 +131,7 @@ fun CyberNeonQuickSettingsBanner(
                     shape = RoundedCornerShape(12.dp)
                 ) {
                     Text(
-                        text = "Add to Quick Settings",
+                        text = "Add Tile",
                         style = MaterialTheme.typography.labelLarge,
                         fontWeight = FontWeight.Bold,
                         color = Color.White

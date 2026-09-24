@@ -1,6 +1,10 @@
 package com.hastaa.datausagemonitor
 
+import android.animation.ObjectAnimator
 import android.os.Bundle
+import android.os.SystemClock
+import android.view.View
+import android.view.animation.PathInterpolator
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
@@ -14,6 +18,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.core.animation.doOnEnd
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import com.hastaa.datausagemonitor.data.local.AppTheme
 import com.hastaa.datausagemonitor.data.local.ThemePreferences
 import com.hastaa.datausagemonitor.ui.screen.dashboard.DashboardScreen
@@ -33,7 +39,29 @@ class MainActivity : ComponentActivity() {
     private val themePreferences by lazy { ThemePreferences(this) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        val splashScreen = installSplashScreen()
         super.onCreate(savedInstanceState)
+
+        val splashStartTime = SystemClock.uptimeMillis()
+        val minSplashDurationMs = 1000L
+
+        splashScreen.setKeepOnScreenCondition {
+            val elapsed = SystemClock.uptimeMillis() - splashStartTime
+            viewModel.uiState.value.isLoading || elapsed < minSplashDurationMs
+        }
+
+        splashScreen.setOnExitAnimationListener { splashScreenViewProvider ->
+            val splashView = splashScreenViewProvider.view
+            val fadeOut = ObjectAnimator.ofFloat(splashView, View.ALPHA, 1f, 0f).apply {
+                interpolator = PathInterpolator(0.4f, 0f, 0.2f, 1f)
+                duration = 400L
+                doOnEnd {
+                    splashScreenViewProvider.remove()
+                }
+            }
+            fadeOut.start()
+        }
+
         enableEdgeToEdge()
 
         val initialTheme = themePreferences.getInitialTheme()
