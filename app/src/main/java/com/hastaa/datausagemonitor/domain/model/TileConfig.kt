@@ -38,22 +38,44 @@ enum class TileIconChoice(val label: String, val subtitle: String) {
     )
 }
 
-enum class TileTextLayout(val label: String, val previewFirst: String, val previewSecond: String) {
+enum class TileTextLayout(
+    val label: String,
+    val previewFirst: String,
+    val previewSecond: String,
+    val subtitle: String = ""
+) {
     SINGLE_LINE(
         label = "Single Line (Value + Network)",
         previewFirst = "7.84 GB Wi-Fi",
-        previewSecond = ""
+        previewSecond = "",
+        subtitle = "Numbers and network combined in one line"
     ),
     DUAL_LINE_NETWORK_FIRST(
         label = "Two Lines (Network on Top)",
-        previewFirst = "WiFi",
-        previewSecond = "7.84 GB"
+        previewFirst = "Wi-Fi",
+        previewSecond = "7.84 GB",
+        subtitle = "Network on top, numbers below"
     ),
     DUAL_LINE_METRIC_FIRST(
         label = "Two Lines (Value on Top)",
         previewFirst = "7.84 GB",
-        previewSecond = "Wi-Fi Today"
-    )
+        previewSecond = "Wi-Fi Today",
+        subtitle = "Numbers on top, network and period below"
+    ),
+    METRIC_ONLY(
+        label = "Numbers Only",
+        previewFirst = "7.84 GB",
+        previewSecond = "",
+        subtitle = "Usage metric only without Wi-Fi or Mobile"
+    ),
+    NETWORK_ONLY(
+        label = "Network Only",
+        previewFirst = "Wi-Fi",
+        previewSecond = "",
+        subtitle = "Network name (Wi-Fi / Mobile) without numbers"
+    );
+
+    val isBoth: Boolean get() = this == SINGLE_LINE || this == DUAL_LINE_NETWORK_FIRST || this == DUAL_LINE_METRIC_FIRST
 }
 
 enum class MetricDisplayMode(val label: String, val subtitle: String) {

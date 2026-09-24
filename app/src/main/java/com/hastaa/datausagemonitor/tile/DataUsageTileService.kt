@@ -1,5 +1,6 @@
 package com.hastaa.datausagemonitor.tile
 
+import android.annotation.SuppressLint
 import android.app.PendingIntent
 import android.content.Intent
 import android.os.Build
@@ -9,7 +10,6 @@ import android.graphics.drawable.Icon
 import com.hastaa.datausagemonitor.MainActivity
 import com.hastaa.datausagemonitor.R
 import com.hastaa.datausagemonitor.data.repository.NetworkUsageRepository
-import com.hastaa.datausagemonitor.domain.model.UsagePeriod
 import com.hastaa.datausagemonitor.util.ActiveNetworkType
 import com.hastaa.datausagemonitor.util.ByteFormatter
 import com.hastaa.datausagemonitor.util.NetworkTypeHelper
@@ -23,11 +23,12 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import kotlin.time.Duration.Companion.seconds
 
-import com.hastaa.datausagemonitor.data.local.TileConfig
-import com.hastaa.datausagemonitor.data.local.TileIconChoice
 import com.hastaa.datausagemonitor.data.local.TilePreferences
-import com.hastaa.datausagemonitor.data.local.TileTextLayout
+import com.hastaa.datausagemonitor.domain.model.TileConfig
+import com.hastaa.datausagemonitor.domain.model.TileIconChoice
+import com.hastaa.datausagemonitor.domain.model.TileTextLayout
 
 /**
  * Quick Settings Tile Service that dynamically presents today's network usage
@@ -56,7 +57,8 @@ class DataUsageTileService : TileService() {
                         ActiveNetworkType.MOBILE, ActiveNetworkType.OFFLINE -> cached.mobileBytes
                     }
                     applyTileState(bytesToShow, initialNetworkType, config)
-                } catch (t: Throwable) {
+                } catch (e: Exception) {
+                    if (e is kotlinx.coroutines.CancellationException) throw e
                     // Safe fallback
                 }
             }
@@ -74,13 +76,14 @@ class DataUsageTileService : TileService() {
                             ActiveNetworkType.MOBILE, ActiveNetworkType.OFFLINE -> summary.mobileBytes
                         }
                         applyTileState(bytesToShow, currentNetwork, config)
-                    } catch (t: Throwable) {
+                    } catch (e: Exception) {
+                        if (e is kotlinx.coroutines.CancellationException) throw e
                         // Safe fallback
                     }
-                    delay(5000L)
+                    delay(5.seconds)
                 }
             }
-        } catch (t: Throwable) {
+        } catch (e: Exception) {
             // Guard against any unexpected system framework exceptions
         }
     }
@@ -90,6 +93,8 @@ class DataUsageTileService : TileService() {
         super.onStopListening()
     }
 
+    @Suppress("DEPRECATION", "StartActivityAndCollapseDeprecated")
+    @SuppressLint("StartActivityAndCollapseDeprecated")
     override fun onClick() {
         super.onClick()
         try {
@@ -106,17 +111,17 @@ class DataUsageTileService : TileService() {
                 )
                 startActivityAndCollapse(pendingIntent)
             } else {
-                @Suppress("DEPRECATION")
+                @Suppress("DEPRECATION", "StartActivityAndCollapseDeprecated")
                 startActivityAndCollapse(launchIntent)
             }
-        } catch (t: Throwable) {
+        } catch (e: Exception) {
             // Fallback for OEMs with non-standard TileService activity launcher behavior
             try {
                 val fallbackIntent = Intent(this, MainActivity::class.java).apply {
                     flags = Intent.FLAG_ACTIVITY_NEW_TASK
                 }
                 startActivity(fallbackIntent)
-            } catch (ignored: Throwable) {}
+            } catch (ignored: Exception) {}
         }
     }
 
@@ -178,6 +183,18 @@ class DataUsageTileService : TileService() {
                 tile.label = "$formatted\n$networkLabel"
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                     tile.subtitle = "$networkLabel ${config.period.label}"
+                }
+            }
+            TileTextLayout.METRIC_ONLY -> {
+                tile.label = formatted
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                    tile.subtitle = ""
+                }
+            }
+            TileTextLayout.NETWORK_ONLY -> {
+                tile.label = networkLabel
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                    tile.subtitle = ""
                 }
             }
         }

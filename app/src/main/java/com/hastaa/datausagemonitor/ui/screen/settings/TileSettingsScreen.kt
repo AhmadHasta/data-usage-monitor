@@ -34,18 +34,20 @@ import com.hastaa.datausagemonitor.domain.model.TileTextLayout
 import com.hastaa.datausagemonitor.ui.screen.settings.components.AppThemeChoiceCard
 import com.hastaa.datausagemonitor.ui.screen.settings.components.ContentStyleChoiceCard
 import com.hastaa.datausagemonitor.ui.screen.settings.components.SectionHeader
-import com.hastaa.datausagemonitor.ui.screen.settings.components.TextLayoutChoiceCard
+import com.hastaa.datausagemonitor.ui.screen.settings.components.TextLayoutBothChoiceCard
+import com.hastaa.datausagemonitor.ui.screen.settings.components.TextLayoutSimpleChoiceCard
 import com.hastaa.datausagemonitor.ui.screen.settings.sections.TileIconChoiceSection
 import com.hastaa.datausagemonitor.ui.screen.settings.sections.TilePeriodSection
 import com.hastaa.datausagemonitor.ui.screen.settings.sections.TileQuotaSection
 import com.hastaa.datausagemonitor.ui.screen.settings.sections.TileSizingSection
 
+@Suppress("FunctionName")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TileSettingsScreen(
     onBack: () -> Unit,
-    viewModel: TileSettingsViewModel = viewModel(),
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    viewModel: TileSettingsViewModel = viewModel()
 ) {
     val state by viewModel.uiState.collectAsState()
     val config = state.config
@@ -98,7 +100,7 @@ fun TileSettingsScreen(
                 )
                 Spacer(modifier = Modifier.height(10.dp))
                 Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                    AppTheme.values().forEach { theme ->
+                    AppTheme.entries.forEach { theme ->
                         AppThemeChoiceCard(
                             theme = theme,
                             isSelected = state.appTheme == theme,
@@ -154,19 +156,26 @@ fun TileSettingsScreen(
 
             item(key = "section_text_layout") {
                 SectionHeader(
-                    title = "Tile Text Layout",
-                    subtitle = "Text format below the Quick Settings toggle button",
+                    title = "Tile Text Content & Layout",
+                    subtitle = "Select whether to show numbers, network name, or both below the tile",
                     icon = Icons.Rounded.TextFields
                 )
                 Spacer(modifier = Modifier.height(10.dp))
                 Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                    TileTextLayout.values().forEach { layout ->
-                        TextLayoutChoiceCard(
-                            layout = layout,
-                            isSelected = config.textLayout == layout,
-                            onSelect = { viewModel.setTextLayout(layout) }
-                        )
-                    }
+                    TextLayoutBothChoiceCard(
+                        selectedLayout = config.textLayout,
+                        onSelectLayout = { viewModel.setTextLayout(it) }
+                    )
+                    TextLayoutSimpleChoiceCard(
+                        layout = TileTextLayout.METRIC_ONLY,
+                        isSelected = config.textLayout == TileTextLayout.METRIC_ONLY,
+                        onSelect = { viewModel.setTextLayout(TileTextLayout.METRIC_ONLY) }
+                    )
+                    TextLayoutSimpleChoiceCard(
+                        layout = TileTextLayout.NETWORK_ONLY,
+                        isSelected = config.textLayout == TileTextLayout.NETWORK_ONLY,
+                        onSelect = { viewModel.setTextLayout(TileTextLayout.NETWORK_ONLY) }
+                    )
                 }
             }
 
