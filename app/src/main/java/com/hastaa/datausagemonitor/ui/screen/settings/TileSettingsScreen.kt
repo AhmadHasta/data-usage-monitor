@@ -35,7 +35,7 @@ import com.hastaa.datausagemonitor.ui.screen.settings.components.AppThemeChoiceC
 import com.hastaa.datausagemonitor.ui.screen.settings.components.ContentStyleChoiceCard
 import com.hastaa.datausagemonitor.ui.screen.settings.components.SectionHeader
 import com.hastaa.datausagemonitor.ui.screen.settings.components.TextLayoutBothChoiceCard
-import com.hastaa.datausagemonitor.ui.screen.settings.components.TextLayoutSimpleChoiceCard
+import com.hastaa.datausagemonitor.ui.screen.settings.components.TextLayoutChoiceCard
 import com.hastaa.datausagemonitor.ui.screen.settings.sections.TileIconChoiceSection
 import com.hastaa.datausagemonitor.ui.screen.settings.sections.TilePeriodSection
 import com.hastaa.datausagemonitor.ui.screen.settings.sections.TileQuotaSection
@@ -166,12 +166,12 @@ fun TileSettingsScreen(
                         selectedLayout = config.textLayout,
                         onSelectLayout = { viewModel.setTextLayout(it) }
                     )
-                    TextLayoutSimpleChoiceCard(
+                    TextLayoutChoiceCard(
                         layout = TileTextLayout.METRIC_ONLY,
                         isSelected = config.textLayout == TileTextLayout.METRIC_ONLY,
                         onSelect = { viewModel.setTextLayout(TileTextLayout.METRIC_ONLY) }
                     )
-                    TextLayoutSimpleChoiceCard(
+                    TextLayoutChoiceCard(
                         layout = TileTextLayout.NETWORK_ONLY,
                         isSelected = config.textLayout == TileTextLayout.NETWORK_ONLY,
                         onSelect = { viewModel.setTextLayout(TileTextLayout.NETWORK_ONLY) }

@@ -1,3 +1,5 @@
+@file:Suppress("FunctionName")
+
 package com.hastaa.datausagemonitor.ui.screen.settings.components
 
 import androidx.compose.animation.AnimatedVisibility
@@ -56,7 +58,6 @@ fun TextLayoutBothChoiceCard(
     modifier: Modifier = Modifier
 ) {
     val isSelected = selectedLayout.isBoth
-    val isExpanded = isSelected
 
     val containerColor by animateColorAsState(
         targetValue = if (isSelected) MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.50f)
@@ -83,7 +84,7 @@ fun TextLayoutBothChoiceCard(
                 modifier = Modifier
                     .fillMaxWidth()
                     .clip(
-                        if (isExpanded) RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp, bottomStart = 8.dp, bottomEnd = 8.dp)
+                        if (isSelected) RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp, bottomStart = 8.dp, bottomEnd = 8.dp)
                         else RoundedCornerShape(20.dp)
                     )
                     .clickable {
@@ -146,7 +147,7 @@ fun TextLayoutBothChoiceCard(
             }
 
             AnimatedVisibility(
-                visible = isExpanded,
+                visible = isSelected,
                 enter = expandVertically(
                     animationSpec = spring(
                         dampingRatio = Spring.DampingRatioLowBouncy,
@@ -216,7 +217,7 @@ fun TextLayoutBothChoiceCard(
 }
 
 @Composable
-fun TextLayoutSimpleChoiceCard(
+fun TextLayoutChoiceCard(
     layout: TileTextLayout,
     isSelected: Boolean,
     onSelect: () -> Unit,
@@ -226,14 +227,14 @@ fun TextLayoutSimpleChoiceCard(
         targetValue = if (isSelected) MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.50f)
         else MaterialTheme.colorScheme.surfaceContainerLow,
         animationSpec = spring(stiffness = Spring.StiffnessMediumLow),
-        label = "simpleLayoutBg"
+        label = "textLayoutBg"
     )
 
     val borderColor by animateColorAsState(
         targetValue = if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.40f)
         else MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.25f),
         animationSpec = spring(stiffness = Spring.StiffnessMediumLow),
-        label = "simpleLayoutBorder"
+        label = "textLayoutBorder"
     )
 
     Card(
@@ -292,20 +293,6 @@ fun TextLayoutSimpleChoiceCard(
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
-                Spacer(modifier = Modifier.height(3.dp))
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(
-                        text = "Preview: ",
-                        style = MaterialTheme.typography.bodySmall.copy(fontSize = 11.5.sp),
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    Text(
-                        text = layout.previewFirst,
-                        style = MaterialTheme.typography.bodySmall.copy(fontSize = 11.5.sp),
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                }
             }
 
             Spacer(modifier = Modifier.width(8.dp))
@@ -404,21 +391,11 @@ private fun TextLayoutSubItem(
                 color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
             )
             Spacer(modifier = Modifier.height(2.dp))
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(
-                    text = "Preview: ",
-                    style = MaterialTheme.typography.bodySmall.copy(fontSize = 11.5.sp),
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                Text(
-                    text = if (layout.previewSecond.isNotBlank())
-                        "${layout.previewFirst} / ${layout.previewSecond}"
-                    else layout.previewFirst,
-                    style = MaterialTheme.typography.bodySmall.copy(fontSize = 11.5.sp),
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.primary
-                )
-            }
+            Text(
+                text = layout.subtitle,
+                style = MaterialTheme.typography.bodySmall.copy(fontSize = 11.5.sp),
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
         }
 
         Spacer(modifier = Modifier.width(8.dp))
