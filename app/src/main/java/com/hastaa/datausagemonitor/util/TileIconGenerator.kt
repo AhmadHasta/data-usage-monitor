@@ -5,6 +5,7 @@ import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.Path
+import android.graphics.Rect
 import android.graphics.RectF
 import android.graphics.Typeface
 import android.graphics.drawable.Icon
@@ -168,6 +169,7 @@ object TileIconGenerator {
         val valueTextSize = (config.metricValueTextSizeSp / 20f) * baseValueSize
         val unitTextSize = (config.metricUnitTextSizeSp / 11f) * 24f
         val spacing = config.metricSpacingDp.toFloat()
+        val gap = (4f + spacing).coerceAtLeast(0f)
 
         val valuePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
             color = Color.WHITE
@@ -183,8 +185,19 @@ object TileIconGenerator {
             typeface = Typeface.create(Typeface.SANS_SERIF, Typeface.BOLD)
         }
 
-        val valueY = centerY + (valueTextSize * 0.18f) - (unitTextSize * 0.5f)
-        val unitY = (valueY + unitTextSize + 4f + spacing).coerceAtMost(118f)
+        val valueBounds = Rect()
+        valuePaint.getTextBounds(value, 0, value.length, valueBounds)
+
+        val unitBounds = Rect()
+        unitPaint.getTextBounds(unit, 0, unit.length, unitBounds)
+
+        val valueVisualHeight = valueBounds.height().toFloat()
+        val unitVisualHeight = unitBounds.height().toFloat()
+        val totalVisualHeight = valueVisualHeight + gap + unitVisualHeight
+
+        val topVisualY = centerY - (totalVisualHeight / 2f)
+        val valueY = topVisualY - valueBounds.top
+        val unitY = (valueY + valueBounds.bottom + gap) - unitBounds.top
 
         canvas.drawText(value, centerX, valueY, valuePaint)
         canvas.drawText(unit, centerX, unitY, unitPaint)
