@@ -1,4 +1,4 @@
-package com.hastaa.datausagemonitor.ui.dashboard
+package com.hastaa.datausagemonitor.ui.screen.dashboard
 
 import com.hastaa.datausagemonitor.domain.model.AppDataUsage
 import com.hastaa.datausagemonitor.domain.model.UsagePeriod

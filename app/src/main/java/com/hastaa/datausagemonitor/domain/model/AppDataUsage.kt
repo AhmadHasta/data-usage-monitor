@@ -1,5 +1,6 @@
 package com.hastaa.datausagemonitor.domain.model
 
+import android.graphics.Bitmap
 import android.graphics.drawable.Drawable
 
 /**
@@ -10,6 +11,7 @@ data class AppDataUsage(
     val packageName: String,
     val appName: String,
     val icon: Drawable? = null,
+    val iconBitmap: Bitmap? = null,
     val mobileBytes: Long = 0L,
     val wifiBytes: Long = 0L,
     val isSystemApp: Boolean = false

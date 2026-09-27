@@ -1,4 +1,4 @@
-package com.hastaa.datausagemonitor.ui.dashboard
+package com.hastaa.datausagemonitor.ui.screen.dashboard
 
 import android.app.Application
 import android.content.ComponentName
@@ -84,7 +84,6 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
             }
 
             try {
-                // Fetch summary and apps concurrently in repository
                 val summary = repository.getDeviceSummary(period)
                 val apps = repository.getAppUsage(period)
 
@@ -99,7 +98,6 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
                     )
                 }
 
-                // Notify Quick Settings Tile to update if period was TODAY
                 if (period == UsagePeriod.TODAY) {
                     notifyTileUpdate()
                 }
@@ -120,8 +118,7 @@ class DashboardViewModel(application: Application) : AndroidViewModel(applicatio
             val context = getApplication<Application>()
             val component = ComponentName(context, DataUsageTileService::class.java)
             TileService.requestListeningState(context, component)
-        } catch (t: Throwable) {
-            // Ignored on platforms or states where tile is not active
+        } catch (_: Throwable) {
         }
     }
 }

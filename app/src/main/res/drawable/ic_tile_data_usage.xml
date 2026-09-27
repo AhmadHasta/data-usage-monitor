@@ -3,14 +3,19 @@
     android:height="24dp"
     android:viewportWidth="24"
     android:viewportHeight="24">
-    <!-- Clean bidirectional data transfer arrows with signal baseline -->
+    <!-- Material 3 Expressive bidirectional data transfer arrows -->
+    <!-- Downward arrow -->
     <path
         android:fillColor="#FFFFFFFF"
-        android:pathData="M4,18h16v2H4z" />
+        android:pathData="M7.75,4 C8.16,4 8.5,4.34 8.5,4.75 V13.09 L11.04,10.54 C11.33,10.25 11.81,10.25 12.1,10.54 C12.39,10.83 12.39,11.31 12.1,11.6 L8.28,15.42 C7.99,15.71 7.51,15.71 7.22,15.42 L3.4,11.6 C3.11,11.31 3.11,10.83 3.4,10.54 C3.69,10.25 4.17,10.25 4.46,10.54 L7,13.09 V4.75 C7,4.34 7.34,4 7.75,4 Z" />
+
+    <!-- Upward arrow -->
     <path
         android:fillColor="#FFFFFFFF"
-        android:pathData="M8.5,15l-4.5,-4.5 1.41,-1.41L8.5,12.17l3.09,-3.08 1.41,1.41z" />
+        android:pathData="M16.25,16 C15.84,16 15.5,15.66 15.5,15.25 V6.91 L12.96,9.46 C12.67,9.75 12.19,9.75 11.9,9.46 C11.61,9.17 11.61,8.69 11.9,8.4 L15.72,4.58 C16.01,4.29 16.49,4.29 16.78,4.58 L20.6,8.4 C20.89,8.69 20.89,9.17 20.6,9.46 C20.31,9.75 19.83,9.75 19.54,9.46 L17,6.91 V15.25 C17,15.66 16.66,16 16.25,16 Z" />
+
+    <!-- Rounded signal baseline bar -->
     <path
         android:fillColor="#FFFFFFFF"
-        android:pathData="M16.5,4l4.5,4.5 -1.41,1.41L16.5,6.83l-3.09,3.08 -1.41,-1.41z" />
+        android:pathData="M4,19.25 C4,18.56 4.56,18 5.25,18 H18.75 C19.44,18 20,18.56 20,19.25 C20,19.94 19.44,20.5 18.75,20.5 H5.25 C4.56,20.5 4,19.94 4,19.25 Z" />
 </vector>

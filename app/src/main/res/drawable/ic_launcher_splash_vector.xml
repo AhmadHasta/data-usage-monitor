@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <group
+        android:name="root_scale_group"
+        android:scaleX="2.5"
+        android:scaleY="2.5"
+        android:translateX="24"
+        android:translateY="24">
+
+        <!-- 1. Horizontal Base Line -->
+        <group
+            android:name="group_base_line"
+            android:pivotX="12"
+            android:pivotY="19"
+            android:scaleX="0.0"
+            android:scaleY="1.0">
+            <path
+                android:name="path_base_line"
+                android:fillAlpha="0.0"
+                android:fillColor="@color/splash_icon_cyan"
+                android:pathData="M4,18h16v2H4z" />
+        </group>
+
+        <!-- 2. Download Stream Arrow (Violet) -->
+        <group
+            android:name="group_download_arrow"
+            android:pivotX="8.5"
+            android:pivotY="12"
+            android:scaleX="0.75"
+            android:scaleY="0.75"
+            android:translateX="0"
+            android:translateY="-8">
+            <path
+                android:name="path_download_arrow"
+                android:fillAlpha="0.0"
+                android:fillColor="@color/splash_icon_violet"
+                android:pathData="M8.5,15l-4.5,-4.5 1.41,-1.41L8.5,12.17l3.09,-3.08 1.41,1.41z" />
+        </group>
+
+        <!-- 3. Upload Stream Arrow (Cyan) -->
+        <group
+            android:name="group_upload_arrow"
+            android:pivotX="16.5"
+            android:pivotY="7"
+            android:scaleX="0.75"
+            android:scaleY="0.75"
+            android:translateX="0"
+            android:translateY="6">
+            <path
+                android:name="path_upload_arrow"
+                android:fillAlpha="0.0"
+                android:fillColor="@color/splash_icon_cyan"
+                android:pathData="M16.5,4l4.5,4.5 -1.41,1.41L16.5,6.83l-3.09,3.08 -1.41,-1.41z" />
+        </group>
+    </group>
+</vector>

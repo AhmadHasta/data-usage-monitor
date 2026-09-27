@@ -4,66 +4,129 @@ import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
+import android.graphics.Path
+import android.graphics.Rect
 import android.graphics.RectF
 import android.graphics.Typeface
 import android.graphics.drawable.Icon
+import com.hastaa.datausagemonitor.data.local.TileConfig
+import com.hastaa.datausagemonitor.data.local.TileContentStyle
+import com.hastaa.datausagemonitor.data.local.TileIconChoice
+import com.hastaa.datausagemonitor.domain.model.MetricDisplayMode
 
 /**
- * Generates dynamic Bitmaps for Quick Settings Tile icons.
- * Renders the active network indicator (Cellular bars or Wi-Fi wave) together with
- * the exact data usage count (e.g. "1.24 GB"), ensuring it is clearly visible inside
- * the circular toggle buttons of Xiaomi HyperOS / MIUI Control Center.
+ * Generates dynamic Bitmaps for Quick Settings Tile icons following
+ * Material Design 3 Expressive geometric principles.
+ * Supports multiple content styles (Metric+Icon, Progress Ring, Progress+Icon, Icon Only).
  */
 object TileIconGenerator {
 
     private const val BITMAP_SIZE = 128
 
+    /**
+     * Backward-compatible default usage icon.
+     */
     fun createUsageIcon(bytes: Long, networkType: ActiveNetworkType): Icon {
         val (value, unit) = ByteFormatter.formatBytesParts(bytes)
         val bitmap = createUsageBitmap(value, unit, networkType)
         return Icon.createWithBitmap(bitmap)
     }
 
-    fun createPermissionIcon(): Icon {
-        val bitmap = Bitmap.createBitmap(BITMAP_SIZE, BITMAP_SIZE, Bitmap.Config.ARGB_8888)
-        val canvas = Canvas(bitmap)
+    /**
+     * Generates icon based on the user's saved TileConfig.
+     */
+    fun createConfiguredIcon(
+        bytes: Long,
+        activeNetwork: ActiveNetworkType,
+        config: TileConfig
+    ): Icon {
+        val (value, unit) = ByteFormatter.formatBytesParts(bytes)
+        val quotaBytes = config.quotaLimitGigaBytes.toLong() * 1024L * 1024L * 1024L
+        val progressRatio = if (quotaBytes > 0L) {
+            (bytes.toFloat() / quotaBytes).coerceIn(0.08f, 1f)
+        } else 0.5f
 
-        val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            color = Color.WHITE
-            textAlign = Paint.Align.CENTER
-            typeface = Typeface.create(Typeface.SANS_SERIF, Typeface.BOLD)
+        val effectiveIconType = when (config.iconChoice) {
+            TileIconChoice.AUTO -> activeNetwork
+            TileIconChoice.WIFI -> ActiveNetworkType.WIFI
+            TileIconChoice.CELLULAR -> ActiveNetworkType.MOBILE
+            TileIconChoice.DATA_USAGE -> ActiveNetworkType.OFFLINE
         }
 
-        paint.textSize = 38f
-        canvas.drawText("SETUP", BITMAP_SIZE / 2f, 54f, paint)
-
-        paint.textSize = 30f
-        canvas.drawText("ACCESS", BITMAP_SIZE / 2f, 98f, paint)
+        val bitmap = when (config.contentStyle) {
+            TileContentStyle.METRIC_WITH_ICON -> when (config.metricDisplayMode) {
+                MetricDisplayMode.NUMBERS_AND_ICON -> createUsageBitmap(value, unit, effectiveIconType, config)
+                MetricDisplayMode.TEXT_ONLY -> createTextOnlyBitmap(value, unit, config)
+                MetricDisplayMode.ICON_ONLY -> createIconOnlyBitmap(effectiveIconType, config)
+            }
+            TileContentStyle.PROGRESS_RING -> createProgressRingBitmap(progressRatio, config)
+            TileContentStyle.PROGRESS_WITH_ICON -> createProgressWithIconBitmap(progressRatio, effectiveIconType, config)
+            TileContentStyle.ICON_ONLY -> createIconOnlyBitmap(effectiveIconType, config)
+        }
 
         return Icon.createWithBitmap(bitmap)
     }
 
-    private fun createUsageBitmap(
+    fun createPermissionIcon(): Icon {
+        val bitmap = Bitmap.createBitmap(BITMAP_SIZE, BITMAP_SIZE, Bitmap.Config.ARGB_8888)
+        val canvas = Canvas(bitmap)
+        val centerX = BITMAP_SIZE / 2f
+
+        val shieldPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            color = Color.WHITE
+            style = Paint.Style.STROKE
+            strokeWidth = 3.5f
+            strokeCap = Paint.Cap.ROUND
+            strokeJoin = Paint.Join.ROUND
+        }
+
+        val shieldPath = Path().apply {
+            moveTo(centerX, 16f)
+            lineTo(centerX + 18f, 24f)
+            quadTo(centerX + 18f, 42f, centerX, 50f)
+            quadTo(centerX - 18f, 42f, centerX - 18f, 24f)
+            close()
+        }
+        canvas.drawPath(shieldPath, shieldPaint)
+
+        val textPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            color = Color.WHITE
+            textAlign = Paint.Align.CENTER
+            typeface = Typeface.create(Typeface.SANS_SERIF, Typeface.BOLD)
+            textSize = 28f
+        }
+        canvas.drawText("SETUP", centerX, 82f, textPaint)
+
+        textPaint.textSize = 22f
+        canvas.drawText("ACCESS", centerX, 110f, textPaint)
+
+        return Icon.createWithBitmap(bitmap)
+    }
+
+    fun createUsageBitmap(
         value: String,
         unit: String,
-        networkType: ActiveNetworkType
+        networkType: ActiveNetworkType,
+        config: TileConfig = TileConfig()
     ): Bitmap {
         val bitmap = Bitmap.createBitmap(BITMAP_SIZE, BITMAP_SIZE, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(bitmap)
         val centerX = BITMAP_SIZE / 2f
 
-        // 1. Draw top active network indicator (Cellular bars or Wi-Fi arc)
-        when (networkType) {
-            ActiveNetworkType.WIFI -> drawWifiIcon(canvas, centerX, 28f)
-            ActiveNetworkType.MOBILE, ActiveNetworkType.OFFLINE -> drawCellularBars(canvas, centerX, 28f)
-        }
+        val iconScale = (1.0f + (config.metricIconSizeDp - 16f) * 0.025f).coerceIn(0.6f, 3.2f)
+        val iconCenterY = 18f
 
-        // 2. Value text sizing and placement
-        val valueTextSize = when {
-            value.length <= 3 -> 44f // e.g. "428", "50", "0"
-            value.length == 4 -> 38f // e.g. "1.24", "18.4"
-            else -> 32f              // e.g. "102.5"
+        val strokeMult = (config.iconStrokeWidthDp / 3f).coerceIn(0.4f, 2.5f)
+        TileIconPainter.drawNetworkIcon(canvas, networkType, centerX, iconCenterY, scale = iconScale, strokeMultiplier = strokeMult)
+
+        val baseValueSize = when {
+            value.length <= 3 -> 44f
+            value.length == 4 -> 38f
+            else -> 32f
         }
+        val valueTextSize = (config.metricValueTextSizeSp / 20f) * baseValueSize
+        val unitTextSize = (config.metricUnitTextSizeSp / 11f) * 22f
+        val spacing = config.metricSpacingDp.toFloat()
 
         val valuePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
             color = Color.WHITE
@@ -75,60 +138,106 @@ object TileIconGenerator {
         val unitPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
             color = Color.WHITE
             textAlign = Paint.Align.CENTER
-            textSize = 26f
+            textSize = unitTextSize
             typeface = Typeface.create(Typeface.SANS_SERIF, Typeface.BOLD)
         }
 
-        // 3. Draw Number & Unit
-        canvas.drawText(value, centerX, 74f, valuePaint)
-        canvas.drawText(unit, centerX, 110f, unitPaint)
+        val valueY = 70f + spacing * 1.5f
+        val unitY = (valueY + unitTextSize + 4f + spacing * 1.5f).coerceAtMost(120f)
+
+        canvas.drawText(value, centerX, valueY, valuePaint)
+        canvas.drawText(unit, centerX, unitY, unitPaint)
 
         return bitmap
     }
 
-    private fun drawCellularBars(canvas: Canvas, centerX: Float, baselineY: Float) {
-        val fillPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+    fun createTextOnlyBitmap(
+        value: String,
+        unit: String,
+        config: TileConfig = TileConfig()
+    ): Bitmap {
+        val bitmap = Bitmap.createBitmap(BITMAP_SIZE, BITMAP_SIZE, Bitmap.Config.ARGB_8888)
+        val canvas = Canvas(bitmap)
+        val centerX = BITMAP_SIZE / 2f
+        val centerY = BITMAP_SIZE / 2f
+
+        val baseValueSize = when {
+            value.length <= 3 -> 46f
+            value.length == 4 -> 40f
+            else -> 34f
+        }
+        val valueTextSize = (config.metricValueTextSizeSp / 20f) * baseValueSize
+        val unitTextSize = (config.metricUnitTextSizeSp / 11f) * 24f
+        val spacing = config.metricSpacingDp.toFloat()
+        val gap = (4f + spacing).coerceAtLeast(0f)
+
+        val valuePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
             color = Color.WHITE
-            style = Paint.Style.FILL
+            textAlign = Paint.Align.CENTER
+            textSize = valueTextSize
+            typeface = Typeface.create(Typeface.SANS_SERIF, Typeface.BOLD)
         }
 
-        val barWidth = 4f
-        val spacing = 3f
-        val startX = centerX - 12.5f
-
-        // 4 cellular signal bars of increasing height
-        val heights = floatArrayOf(6f, 11f, 16f, 21f)
-        for (i in heights.indices) {
-            val left = startX + i * (barWidth + spacing)
-            val top = baselineY - heights[i]
-            val rect = RectF(left, top, left + barWidth, baselineY)
-            canvas.drawRoundRect(rect, 1.5f, 1.5f, fillPaint)
+        val unitPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            color = Color.WHITE
+            textAlign = Paint.Align.CENTER
+            textSize = unitTextSize
+            typeface = Typeface.create(Typeface.SANS_SERIF, Typeface.BOLD)
         }
+
+        val valueBounds = Rect()
+        valuePaint.getTextBounds(value, 0, value.length, valueBounds)
+
+        val unitBounds = Rect()
+        unitPaint.getTextBounds(unit, 0, unit.length, unitBounds)
+
+        val valueVisualHeight = valueBounds.height().toFloat()
+        val unitVisualHeight = unitBounds.height().toFloat()
+        val totalVisualHeight = valueVisualHeight + gap + unitVisualHeight
+
+        val topVisualY = centerY - (totalVisualHeight / 2f)
+        val valueY = topVisualY - valueBounds.top
+        val unitY = (valueY + valueBounds.bottom + gap) - unitBounds.top
+
+        canvas.drawText(value, centerX, valueY, valuePaint)
+        canvas.drawText(unit, centerX, unitY, unitPaint)
+
+        return bitmap
     }
 
-    private fun drawWifiIcon(canvas: Canvas, centerX: Float, dotY: Float) {
-        val dotPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            color = Color.WHITE
-            style = Paint.Style.FILL
+    fun createProgressRingBitmap(
+        progressRatio: Float,
+        config: TileConfig = TileConfig()
+    ): Bitmap {
+        return TileRingRenderer.createProgressRingBitmap(progressRatio, config, BITMAP_SIZE)
+    }
+
+    fun createProgressWithIconBitmap(
+        progressRatio: Float,
+        networkType: ActiveNetworkType,
+        config: TileConfig = TileConfig()
+    ): Bitmap {
+        return TileRingRenderer.createProgressWithIconBitmap(progressRatio, networkType, config, BITMAP_SIZE)
+    }
+
+    fun createIconOnlyBitmap(
+        networkType: ActiveNetworkType,
+        config: TileConfig = TileConfig()
+    ): Bitmap {
+        val bitmap = Bitmap.createBitmap(BITMAP_SIZE, BITMAP_SIZE, Bitmap.Config.ARGB_8888)
+        val canvas = Canvas(bitmap)
+        val centerX = BITMAP_SIZE / 2f
+        val centerY = BITMAP_SIZE / 2f
+
+        val iconScale = if (config.iconOnlySizeDp <= 38) {
+            1.0f + (config.iconOnlySizeDp - 24f) / 14f * (2.0f - 1.0f)
+        } else {
+            2.0f + (config.iconOnlySizeDp - 38f) / 62f * (4.5f - 2.0f)
         }
-        val strokePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            color = Color.WHITE
-            style = Paint.Style.STROKE
-            strokeWidth = 3f
-            strokeCap = Paint.Cap.ROUND
-        }
+        val strokeMult = (config.iconStrokeWidthDp / 3f).coerceIn(0.4f, 2.5f)
 
-        // Center dot
-        canvas.drawCircle(centerX, dotY, 2.5f, dotPaint)
+        TileIconPainter.drawNetworkIcon(canvas, networkType, centerX, centerY, scale = iconScale, strokeMultiplier = strokeMult)
 
-        // Inner wave
-        val r1 = 10f
-        val rect1 = RectF(centerX - r1, dotY - r1, centerX + r1, dotY + r1)
-        canvas.drawArc(rect1, 225f, 90f, false, strokePaint)
-
-        // Outer wave
-        val r2 = 18f
-        val rect2 = RectF(centerX - r2, dotY - r2, centerX + r2, dotY + r2)
-        canvas.drawArc(rect2, 225f, 90f, false, strokePaint)
+        return bitmap
     }
 }

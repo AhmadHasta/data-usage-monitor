@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<animated-vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:drawable="@drawable/ic_launcher_splash_vector">
+
+    <target
+        android:name="group_base_line"
+        android:animation="@animator/anim_splash_base_line_scale" />
+
+    <target
+        android:name="path_base_line"
+        android:animation="@animator/anim_splash_base_line_alpha" />
+
+    <target
+        android:name="group_download_arrow"
+        android:animation="@animator/anim_splash_download_arrow" />
+
+    <target
+        android:name="path_download_arrow"
+        android:animation="@animator/anim_splash_download_arrow_alpha" />
+
+    <target
+        android:name="group_upload_arrow"
+        android:animation="@animator/anim_splash_upload_arrow" />
+
+    <target
+        android:name="path_upload_arrow"
+        android:animation="@animator/anim_splash_upload_arrow_alpha" />
+
+</animated-vector>

@@ -9,3 +9,8 @@ build/
 .externalNativeBuild
 .cxx
 local.properties
+
+.kotlin/
+
+# Agent skills
+.agents/skills/
