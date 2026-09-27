@@ -1,11 +1,14 @@
 package com.hastaa.datausagemonitor.tile
 
 import android.annotation.SuppressLint
+import android.app.ActivityOptions
 import android.app.PendingIntent
+import android.content.ComponentName
 import android.content.Intent
 import android.os.Build
 import android.service.quicksettings.Tile
 import android.service.quicksettings.TileService
+import android.window.SplashScreen
 import android.graphics.drawable.Icon
 import com.hastaa.datausagemonitor.MainActivity
 import com.hastaa.datausagemonitor.R
@@ -98,16 +101,26 @@ class DataUsageTileService : TileService() {
     override fun onClick() {
         super.onClick()
         try {
-            val launchIntent = Intent(this, MainActivity::class.java).apply {
+            val launchIntent = (packageManager.getLaunchIntentForPackage(packageName)
+                ?: Intent(this, MainActivity::class.java)).apply {
+                component = ComponentName(this@DataUsageTileService, MainActivity::class.java)
+                action = Intent.ACTION_MAIN
+                addCategory(Intent.CATEGORY_LAUNCHER)
+                putExtra(MainActivity.EXTRA_FROM_QS_TILE, true)
                 flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
             }
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                val options = ActivityOptions.makeBasic().apply {
+                    splashScreenStyle = SplashScreen.SPLASH_SCREEN_STYLE_ICON
+                }.toBundle()
+
                 val pendingIntent = PendingIntent.getActivity(
                     this,
                     0,
                     launchIntent,
-                    PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+                    PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
+                    options
                 )
                 startActivityAndCollapse(pendingIntent)
             } else {
@@ -118,6 +131,9 @@ class DataUsageTileService : TileService() {
             // Fallback for OEMs with non-standard TileService activity launcher behavior
             try {
                 val fallbackIntent = Intent(this, MainActivity::class.java).apply {
+                    action = Intent.ACTION_MAIN
+                    addCategory(Intent.CATEGORY_LAUNCHER)
+                    putExtra(MainActivity.EXTRA_FROM_QS_TILE, true)
                     flags = Intent.FLAG_ACTIVITY_NEW_TASK
                 }
                 startActivity(fallbackIntent)
